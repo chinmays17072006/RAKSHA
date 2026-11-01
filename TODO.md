@@ -493,3 +493,72 @@ After completing Phase 1, stop and provide: (1) what was implemented; (2) what i
 - The browser validation harness had one timing-related selector failure and one corrected test-script syntax error; subsequent manual and scripted UI flows completed. No blocking application runtime error was observed. The build retains non-blocking existing Vite warnings for the platform config script lacking `type=module` and the main client chunk exceeding 500 kB.
 - Offline requests and network state are in-memory demo state, not durable across a full application reload and not a real or guaranteed emergency communications service. No live network, external API, database, or backend was added.
 - Credit balance is not available from the project environment; 458 was the user's reported starting estimate, not a verified current balance.
+
+
+## Phase 8 — End-to-End Demo Mode — Complete
+
+### 80. Preserve the existing project and implement Phase 8 only — Complete
+- The user reports 268 Manus credits remaining. This is the final major implementation. Use the absolute minimum possible code changes. Do NOT rebuild or redesign the application, refactor existing architecture, install packages, create a backend, add external APIs or cloud services, create new complex systems, modify completed features unless absolutely necessary, or start Phase 9 or Phase 10.
+- Reuse the existing RAKSHA state, components, pages, styles, data, and functionality from Phases 0–7. The goal is ONLY a lightweight End-to-End Demo Mode that orchestrates the existing functionality. Do not rebuild Citizen SOS, AI Triage, Safe Routing, Rescue Operations, Shelters & Resources, or Offline Resilience.
+- Existing operational story: CITIZEN SOS → AI TRIAGE → CRITICAL/P0 → ROAD C → SHELTER 07 → TEAM BRAVO → DISPATCH → RESOURCES → NETWORK FAILURE → OFFLINE SOS → NETWORK RESTORED → SYNC.
+
+### 81. Provide one simple entry point and compact Demo Mode screen — Complete
+- Create one simple RAKSHA DEMO MODE entry point. Prefer a suitable existing Command Center location; do not redesign the sidebar or make unnecessary navigation changes. If a route is required, add only `/demo` and do not modify unrelated routes.
+- Provide the primary button START RAKSHA DEMO and a RESET DEMO control. The judge must be able to start the entire story without manually navigating through every page.
+- Create a lightweight overlay/page/panel using the existing RAKSHA shell, not a new dashboard architecture. Header: RAKSHA; AI DISASTER INTELLIGENCE. Status: LIVE DEMONSTRATION. Show current step, e.g. 03 / 11, the current step label, key result, and compact sequence progress.
+- Keep progress compact: DISASTER → SOS → AI → ROUTE → RESCUE → DISPATCH → SHELTER → OFFLINE → SYNC → COMPLETE.
+
+### 82. Use the same centralized records and avoid duplicate demo data — Complete
+- Use the existing centralized state/actions wherever possible. Do NOT create duplicate incident/team/shelter/network state or separate fake `demoIncident`, `demoTeam`, `demoShelter`, or `demoRoute` objects. A temporary demo controller may call existing actions rather than duplicate the underlying data.
+- Use Incident #1043, Team Bravo, Road C, Shelter 07, existing network state, and existing offline queue. For Incident #1043, show the existing record; do not create a duplicate. If it is absent in a fresh session, use the same existing citizen SOS creation action once so the one-button demo can begin, then operate on that shared record.
+
+### 83. Orchestrate the disaster, SOS, triage, and route story — Complete
+- STEP 1 — DISASTER DETECTED: display FLASH FLOOD DETECTED; location SECTOR 04; risk HIGH, then transition to CRITICAL; show a simple progress/status indicator. This is a simulated demo event.
+- STEP 2 — CITIZEN SOS: show CITIZEN SOS RECEIVED; Incident #1043; 4 people; 1 elderly person; location SECTOR 04. Use the existing incident, not a duplicate.
+- STEP 3 — AI TRIAGE: show AI TRIAGE COMPLETE; priority P0; severity CRITICAL; confidence 94%; action IMMEDIATE RESCUE. Use the existing Phase 3 triage result; do not create another triage engine.
+- STEP 4 — SAFE ROUTING: show SAFE ROUTE IDENTIFIED; ROAD A — BLOCKED (rejected); ROAD B — HIGH RISK (avoid); ROAD C — SAFE (selected); destination SHELTER 07; distance 6.2 KM; ETA 11 MIN; risk LOW. Reuse the existing Phase 4 routing state.
+
+### 84. Orchestrate the team recommendation, dispatch, and shelter/resource story — Complete
+- STEP 5 — RESCUE TEAM: show RESCUE UNIT RECOMMENDED; TEAM BRAVO; status AVAILABLE; medical YES; capacity 6; ETA 11 MIN; reason “Closest available team with sufficient capacity and medical support.” Reuse the existing Phase 5 rescue logic.
+- STEP 6 — DISPATCH: show TEAM BRAVO DISPATCHED; status EN ROUTE; ETA 11 MIN. Use the existing dispatch action. Do NOT create a fake separate dispatch state.
+- STEP 7 — SHELTER: show SAFE DESTINATION; SHELTER 07; occupancy 32%; access LOW RISK; FOOD AVAILABLE; WATER AVAILABLE; MEDICAL AVAILABLE. Reuse Phase 6 data.
+
+### 85. Orchestrate the network/offline SOS/synchronization story — Complete
+- STEP 8 — NETWORK FAILURE: show NETWORK FAILURE DETECTED, then OFFLINE MODE ACTIVE. Use existing Phase 7 network state; do not create a second offline mechanism.
+- STEP 9 — OFFLINE SOS: show OFFLINE SOS QUEUED; Incident #1044; location SECTOR 05; 3 people; status QUEUED OFFLINE. Use existing Phase 7 offline SOS functionality.
+- STEP 10 — NETWORK RESTORED: show NETWORK RESTORED; then SYNCING OFFLINE DATA; then SOS #1044 SYNCHRONIZED. Use existing Phase 7 sync functionality.
+
+### 86. Finish with the complete operational summary — Complete
+- STEP 11 — FINAL STATUS: finish with RESCUE OPERATION ACTIVE; Incident #1043 — CRITICAL / P0; route ROAD C → SHELTER 07; rescue TEAM BRAVO — EN ROUTE; ETA 11 MIN; Offline resilience SYNC COMPLETE.
+- Show the exact final message: “RAKSHA HAS COORDINATED THE RESPONSE.”
+
+### 87. Make the sequence controllable and show progress — Complete
+- The demo may advance automatically or provide a simple NEXT / NEXT STEP button. Prefer short deterministic transitions between steps. Do NOT create complicated animation systems or long delays.
+- The entire demonstration must be controllable within approximately 60–120 seconds; the judge must not wait several minutes. If automatic transitions are difficult with the existing architecture, use NEXT STEP. Functionality is more important than animation.
+
+### 88. Reset only state modified by Demo Mode — Complete
+- Add RESET DEMO. Reuse an existing reset/demo mechanism if available; do not create a new global reset system. If a minimal reset function is required, reset only the state modified by Demo Mode.
+- Reset must restore Incident #1043; Team Bravo → AVAILABLE; Road C selected; Shelter 07; Network → CONNECTED; Offline queue → empty. Do not delete unrelated application data.
+
+### 89. Match RAKSHA visual identity and stay responsive — Complete
+- Match the existing RAKSHA visual language: dark command-center background; white/off-white typography; cyan/blue live indicators; red for critical; amber for warnings; green for safe/complete; existing Lucide icons, spacing, and components.
+- Do NOT add huge gradients, excessive glassmorphism, rainbow colors, giant decorative graphics, excessive rounded cards, or unnecessary animations. This is an operational demo, not a marketing landing page.
+- Verify desktop, tablet, and 390px mobile. No horizontal overflow; the demo must remain usable at 390px.
+
+### 90. Regression protection, credit control, stop condition, and final handoff — Complete
+- Verify: START RAKSHA DEMO works; disaster step appears; Incident #1043 is used; AI triage shows CRITICAL/P0 and 94% confidence; Road C is selected; Shelter 07 appears; Team Bravo appears; Team Bravo dispatch works; network failure appears; offline SOS #1044 appears; network restoration appears; #1044 sync completes; final operational summary appears; RESET DEMO works.
+- Verify existing Command Center, Citizen SOS, AI Triage, Safe Routing, Rescue Operations, Shelters & Resources, and Offline Mode still work. TypeScript check passes; production build passes; no blocking browser console errors; 390px has no horizontal overflow.
+- This is a simulated hackathon demonstration using deterministic/local demo data. Do NOT claim real emergency dispatch, emergency communications, AI inference, GPS, disaster prediction, or rescue-service integration.
+- Only 268 credits remain. Do NOT rebuild, refactor, redesign, install packages, create a backend/database, add APIs/live maps/authentication, create complex animations or state management, or rewrite existing pages. Reuse existing functionality/components and make the smallest possible changes.
+- After Phase 8 is implemented and tested, STOP. Do NOT start Phase 9 or Phase 10, perform broad polish, or modify unrelated functionality.
+- Final report must include: what was implemented; files changed; tests performed; test results; browser validation; errors/warnings; known limitations; Git commit hash; worktree status; remaining Manus credits.
+- Final expected story: FLASH FLOOD DETECTED → CITIZEN SOS → AI TRIAGE: CRITICAL/P0 → ROAD C SAFE → SHELTER 07 → TEAM BRAVO → DISPATCHED → NETWORK FAILURE → OFFLINE SOS #1044 → NETWORK RESTORED → SYNC COMPLETE → RESCUE OPERATION ACTIVE. STOP AFTER PHASE 8.
+
+### Phase 8 verification evidence
+- `pnpm check` passed; `pnpm test` passed all 28 tests across 7 files, including the shared dispatch/reset regression; `pnpm build` succeeded; `git diff --check` was clean. The exact static manifest has eight page routes, including `/demo`, and both `/demo` and `/manus-routes.json` returned HTTP 200.
+- Browser validation from the existing Command Center's START RAKSHA DEMO control advanced through all 11 expected stages and confirmed the final Incident #1043 CRITICAL/P0, Road C → Shelter 07, Team Bravo EN ROUTE, 11-minute ETA, #1044 sync complete, and exact final message. RESET DEMO restored #1043, Road C, Team Bravo AVAILABLE, CONNECTED, and no demo-generated #1044.
+- Responsive end-to-end measurements: 390px mobile completed all 11 steps with no horizontal overflow (content width 375px); 768px tablet and 1024px desktop also completed at Step 11 without overflow.
+- Independent review found and prompted a reset fix: Phase 8-tagged records are now removed selectively; an untagged pre-existing #1044 blocks demo start rather than being overwritten; unit coverage confirms unrelated #1045 incident and offline queue records survive reset.
+- Browser console inspection showed no blocking application runtime errors. Build output retains non-blocking Vite warnings for the platform config script without `type=module` and the 621.19 kB main client chunk. Vitest logs an expected missing-session-fields message from its passing negative-path auth test.
+- Known limitations: this is a deterministic, in-memory simulation; app state resets on reload; no live emergency dispatch, communications, AI inference, GPS, or emergency-service integration is connected.
+- Credit note: 268 was the user-provided starting estimate; live remaining balance is not available in the project environment.

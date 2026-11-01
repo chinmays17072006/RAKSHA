@@ -9,6 +9,7 @@ import SafeRoutingPage from "./features/safe-routing/SafeRoutingPage";
 import RescueOperationsPage from "./features/rescue-operations/RescueOperationsPage";
 import SheltersResourcesPage from "./features/shelters-resources/SheltersResourcesPage";
 import OfflineModePage from "./features/offline-mode/OfflineModePage";
+import DemoModePage from "./features/demo-mode/DemoModePage";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/rescue-operations" component={RescueOperationsPage} />
       <Route path="/shelters-resources" component={SheltersResourcesPage} />
       <Route path="/offline-mode" component={OfflineModePage} />
+      <Route path="/demo" component={DemoModePage} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { demoOperations } from "../../data/demo";
-import type { Incident, IncidentTimelineEvent, OperationsState, RescueTeam } from "../../types/disaster";
-import { applyRescueDispatch, type RescueDispatchRequest } from "./OperationsContext";
+import type { Incident, IncidentTimelineEvent, OfflineSOSRequest, OperationsState, RescueTeam } from "../../types/disaster";
+import { applyDemoReset, applyRescueDispatch, type RescueDispatchRequest } from "./OperationsContext";
 
 function createState(): OperationsState {
   const incident: Incident = {
@@ -86,5 +86,69 @@ describe("applyRescueDispatch", () => {
 
     expect(applyRescueDispatch(unavailableState, createRequest(dispatchEvents))).toBe(unavailableState);
     expect(applyRescueDispatch(unsafeRouteState, createRequest(dispatchEvents))).toBe(unsafeRouteState);
+  });
+});
+
+describe("applyDemoReset", () => {
+  it("restores only the shared #1043 demo scenario and clears its synced offline request", () => {
+    const dispatchedState: OperationsState = applyRescueDispatch(createState(), createRequest(dispatchEvents));
+    const offlineRequest: OfflineSOSRequest = {
+      id: "1044",
+      type: "Flash Flood",
+      location: "Sector 05",
+      people: 3,
+      priority: "PENDING TRIAGE",
+      reportedAt: "10:30:00",
+      status: "SYNCED",
+      demoRunId: "phase8",
+    };
+    const unrelatedRequest: OfflineSOSRequest = {
+      id: "1045",
+      type: "Flash Flood",
+      location: "Sector 05",
+      people: 3,
+      priority: "PENDING TRIAGE",
+      reportedAt: "10:31:00",
+      status: "QUEUED OFFLINE",
+    };
+    const syncedIncident: Incident = {
+      ...dispatchedState.incidents[0],
+      id: "1044",
+      location: "Sector 05",
+      peopleAffected: 3,
+      vulnerablePeople: 0,
+      message: "Offline-first demo SOS created locally during simulated network loss.",
+      source: "Citizen SOS",
+      demoRunId: "phase8",
+    };
+    const unrelatedIncident: Incident = {
+      ...dispatchedState.incidents[0],
+      id: "1045",
+      location: "Sector 06",
+      message: "Unrelated field report retained by demo reset.",
+      source: "Field report",
+    };
+    const state: OperationsState = {
+      ...dispatchedState,
+      incidents: [syncedIncident, unrelatedIncident, ...dispatchedState.incidents],
+      offlineQueue: [offlineRequest, unrelatedRequest],
+      systemStatus: { ...dispatchedState.systemStatus, network: "Disconnected", dataSync: "Paused", activeSOSCount: 25 },
+    };
+
+    const reset: OperationsState = applyDemoReset(state);
+    const incident: Incident | undefined = reset.incidents.find((item: Incident) => item.id === "1043");
+    const team: RescueTeam | undefined = reset.rescueTeams.find((item: RescueTeam) => item.id === "team-bravo");
+
+    expect(incident).toMatchObject({ status: "Triaged — Critical", priority: "P0", severity: "Critical", routeAnalysisStatus: "Complete", recommendedRoute: "Road C", destinationShelter: "SHELTER 07", routeEta: 11, routeRisk: "Low" });
+    expect(incident?.rescueTeamId).toBeUndefined();
+    expect(incident?.timeline.some((event: IncidentTimelineEvent) => event.title === "TEAM BRAVO DISPATCHED")).toBe(false);
+    expect(team).toMatchObject({ status: "Available", availability: 100 });
+    expect(team?.assignedIncidentId).toBeUndefined();
+    expect(reset.incidents.some((item: Incident) => item.id === "1044")).toBe(false);
+    expect(reset.incidents.find((item: Incident) => item.id === "1045")).toEqual(unrelatedIncident);
+    expect(reset.offlineQueue).toEqual([unrelatedRequest]);
+    expect(reset.systemStatus).toMatchObject({ network: "Connected", dataSync: "Live", activeSOSCount: 24 });
+    expect(reset.incidents.find((item: Incident) => item.id === "1042")).toEqual(state.incidents.find((item: Incident) => item.id === "1042"));
+    expect(state.rescueTeams.find((item: RescueTeam) => item.id === "team-bravo")?.status).toBe("En route");
   });
 });

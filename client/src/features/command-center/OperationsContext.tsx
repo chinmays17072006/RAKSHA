@@ -15,7 +15,8 @@ type OperationsAction =
   | { type: "incident/update"; id: string; changes: Partial<Incident> }
   | { type: "system/update"; changes: Partial<OperationsState["systemStatus"]> }
   | { type: "offline/set"; request: OfflineSOSRequest }
-  | { type: "rescue/dispatch"; request: RescueDispatchRequest };
+  | { type: "rescue/dispatch"; request: RescueDispatchRequest }
+  | { type: "demo/reset" };
 
 interface OperationsContextValue {
   state: OperationsState;
@@ -25,6 +26,7 @@ interface OperationsContextValue {
   updateSystemStatus: (changes: Partial<OperationsState["systemStatus"]>) => void;
   setOfflineRequest: (request: OfflineSOSRequest) => void;
   dispatchRescueTeam: (request: RescueDispatchRequest) => boolean;
+  resetDemoScenario: () => void;
 }
 
 const OperationsContext = createContext<OperationsContextValue | null>(null);
@@ -73,6 +75,62 @@ export function applyRescueDispatch(state: OperationsState, request: RescueDispa
   };
 }
 
+export function applyDemoReset(state: OperationsState): OperationsState {
+  const isDemoOfflineIncident = (incident: Incident) => incident.id === "1044" && incident.demoRunId === "phase8";
+  const removeSyncedDemoIncident = state.incidents.some(isDemoOfflineIncident);
+
+  return {
+    ...state,
+    incidents: state.incidents
+      .filter((incident) => !(removeSyncedDemoIncident && isDemoOfflineIncident(incident)))
+      .map((incident) => {
+        if (incident.id !== "1043") return incident;
+        const { rescueTeamId, rescueRecommendationReason, rescueEtaMinutes, rescueDispatchedAt, ...base } = incident;
+        return {
+          ...base,
+          type: "Flash Flood",
+          location: "Sector 04",
+          peopleAffected: 4,
+          vulnerablePeople: 1,
+          vulnerablePerson: "Elderly Person",
+          message: "Water has entered our house. Four people are trapped inside. My grandmother is with us and cannot walk.",
+          source: "Citizen SOS",
+          severity: "Critical",
+          priority: "P0",
+          status: "Triaged — Critical",
+          triageStatus: "Complete",
+          recommendedAction: "Immediate Rescue",
+          medicalSupport: "Recommended",
+          aiConfidence: 94,
+          routeAnalysisStatus: "Complete",
+          recommendedRoute: "Road C",
+          destinationShelter: "SHELTER 07",
+          routeDistanceKm: 6.2,
+          routeEta: 11,
+          routeRisk: "Low",
+          timeline: base.timeline.filter((event) =>
+            !event.title.includes("TEAM BRAVO RECOMMENDED")
+            && !event.title.includes("TEAM BRAVO DISPATCHED")
+            && event.title !== "TEAM EN ROUTE",
+          ),
+        };
+      }),
+    rescueTeams: state.rescueTeams.map((team) => {
+      if (team.id !== "team-bravo") return team;
+      const { assignedIncidentId, ...availableTeam } = team;
+      return { ...availableTeam, status: "Available", availability: 100 };
+    }),
+    offlineQueue: (state.offlineQueue ?? []).filter((request) => request.demoRunId !== "phase8"),
+    systemStatus: {
+      ...state.systemStatus,
+      network: "Connected",
+      dataSync: "Live",
+      lastSync: "Just now",
+      activeSOSCount: Math.max(0, state.systemStatus.activeSOSCount - (removeSyncedDemoIncident ? 1 : 0)),
+    },
+  };
+}
+
 function operationsReducer(state: OperationsState, action: OperationsAction): OperationsState {
   switch (action.type) {
     case "incident/add":
@@ -104,6 +162,8 @@ function operationsReducer(state: OperationsState, action: OperationsAction): Op
     }
     case "rescue/dispatch":
       return applyRescueDispatch(state, action.request);
+    case "demo/reset":
+      return applyDemoReset(state);
     default:
       return state;
   }
@@ -130,7 +190,8 @@ export function OperationsProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "rescue/dispatch", request });
     return true;
   }, [state]);
-  const value = useMemo(() => ({ state, addIncident, createIncident, updateIncident, updateSystemStatus, setOfflineRequest, dispatchRescueTeam }), [state, addIncident, createIncident, updateIncident, updateSystemStatus, setOfflineRequest, dispatchRescueTeam]);
+  const resetDemoScenario = useCallback(() => dispatch({ type: "demo/reset" }), []);
+  const value = useMemo(() => ({ state, addIncident, createIncident, updateIncident, updateSystemStatus, setOfflineRequest, dispatchRescueTeam, resetDemoScenario }), [state, addIncident, createIncident, updateIncident, updateSystemStatus, setOfflineRequest, dispatchRescueTeam, resetDemoScenario]);
 
   return <OperationsContext.Provider value={value}>{children}</OperationsContext.Provider>;
 }

@@ -27,6 +27,7 @@ export interface Incident {
   createdAt?: string;
   message: string;
   source: "SOS" | "Sensor" | "Field report" | "Citizen SOS";
+  demoRunId?: "phase8";
   coordinates: { x: number; y: number };
   timeline: IncidentTimelineEvent[];
   triageStatus?: IncidentTriageStatus;
@@ -128,13 +129,14 @@ export interface SOSRequest {
 }
 
 export interface OfflineSOSRequest {
-  id: "1044";
+  id: string;
   type: "Flash Flood";
   location: "Sector 05";
   people: 3;
   priority: "PENDING TRIAGE";
   reportedAt: string;
   status: "QUEUED OFFLINE" | "SYNCING" | "SYNCED";
+  demoRunId?: "phase8";
 }
 
 export interface SystemStatus {
