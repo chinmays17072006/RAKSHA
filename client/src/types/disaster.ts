@@ -1,8 +1,8 @@
 export type Severity = "Critical" | "High" | "Medium" | "Moderate" | "Low" | "Pending triage";
 export type IncidentPriority = "P0" | "P1" | "P2" | "P3" | "Pending";
-export type IncidentStatus = "Awaiting rescue" | "Under review" | "Monitoring" | "Contained" | "SOS received" | "Triaged — Critical";
+export type IncidentStatus = "Awaiting rescue" | "Under review" | "Monitoring" | "Contained" | "SOS received" | "Triaged — Critical" | "Rescue dispatched";
 export type IncidentTriageStatus = "Complete" | "Manual review required";
-export type TeamStatus = "En route" | "On scene" | "Mobilizing" | "Staged" | "Available";
+export type TeamStatus = "En route" | "On scene" | "Mobilizing" | "Staged" | "Available" | "Busy" | "Unavailable";
 export type RiskLevel = "Critical" | "High" | "Moderate" | "Safe";
 
 export interface IncidentTimelineEvent {
@@ -35,6 +35,10 @@ export interface Incident {
   aiConfidence?: number;
   aiAssessment?: string;
   triagedAt?: string;
+  rescueTeamId?: string;
+  rescueRecommendationReason?: string;
+  rescueEtaMinutes?: number;
+  rescueDispatchedAt?: string;
   routeAnalysisStatus?: "Complete" | "No safe route";
   recommendedRoute?: string;
   destinationShelter?: string;
@@ -48,6 +52,9 @@ export interface RescueTeam {
   id: string;
   name: string;
   members: number;
+  capacity?: number;
+  medicalSupport?: boolean;
+  distanceKm?: number;
   status: TeamStatus;
   location: string;
   vehicle: string;

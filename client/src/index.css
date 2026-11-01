@@ -1110,3 +1110,120 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible { outline: 
 @media (prefers-reduced-motion: reduce) {
   .safe-route-map__road, .safe-route-map__selected, .safe-routing-steps { transition: none; animation: none; }
 }
+
+
+/* Phase 5 · Rescue Operations */
+.rescue-operations { padding-bottom: 30px; }
+.rescue-operations__heading .page-heading__actions { align-items: flex-end; }
+.rescue-operations__notice { display: flex; align-items: center; gap: 9px; margin: 0 0 12px; padding: 9px 11px; border: 1px solid rgba(83,199,220,.16); border-radius: 4px; background: rgba(83,199,220,.025); color: #92a9af; font-size: 8px; line-height: 1.5; }
+.rescue-operations__notice > svg { flex: 0 0 auto; color: var(--cyan); }
+.rescue-operations__notice strong { margin-right: 5px; color: #c8d8dc; font-size: 7px; letter-spacing: .09em; }
+.rescue-operations__prerequisite { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; padding: 11px 12px; border: 1px solid rgba(242,184,94,.22); border-radius: 4px; background: rgba(242,184,94,.035); }
+.rescue-operations__prerequisite > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.rescue-operations__prerequisite strong { color: #e4d2ac; font-size: 9px; }
+.rescue-operations__prerequisite span { color: #a99b7e; font-size: 8px; line-height: 1.45; }
+.rescue-operations__summary-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 11px; margin-top: 12px; }
+.rescue-incident-card, .rescue-route-card, .rescue-team-panel, .rescue-recommendation-card, .rescue-timeline-card { min-width: 0; padding: 14px; }
+.rescue-incident-card__header, .rescue-route-card__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.rescue-incident-card__header .status-badge, .rescue-route-card__header .status-badge { flex: 0 0 auto; }
+.rescue-incident-card__location { display: flex; align-items: center; gap: 7px; margin-top: 12px; color: #a9bcc0; }
+.rescue-incident-card__location svg { color: var(--cyan); }
+.rescue-incident-card__location strong { color: #dbe7e8; font-family: var(--font-display); font-size: 9px; letter-spacing: .04em; }
+.rescue-incident-card__location > span { margin-left: auto; color: #657b84; font-size: 6px; font-weight: 700; letter-spacing: .09em; }
+.rescue-incident-card__facts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-top: 13px; padding-top: 11px; border-top: 1px solid var(--line-soft); }
+.rescue-incident-card__facts > div { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; }
+.rescue-incident-card__facts > div > span { color: #728890; font-size: 6px; font-weight: 700; letter-spacing: .08em; }
+.rescue-incident-card__facts > div > strong { display: inline-flex; align-items: center; gap: 5px; color: #dae4e5; font-family: var(--font-display); font-size: 12px; }
+.rescue-incident-card__facts > div > strong svg { color: var(--cyan); }
+.rescue-incident-card__facts .severity-badge { min-height: 22px; }
+.rescue-incident-card__action { display: flex; align-items: center; gap: 7px; margin-top: 11px; padding: 8px 9px; border-left: 2px solid var(--red); background: rgba(241,116,108,.045); color: #dfa19b; font-size: 7px; font-weight: 700; letter-spacing: .07em; }
+.rescue-incident-card__empty, .rescue-route-card__empty { display: flex; align-items: center; gap: 9px; min-height: 76px; margin-top: 10px; color: #8ca0a7; font-size: 8px; }
+.rescue-incident-card__empty svg { color: var(--cyan); }
+.rescue-route-card__path { display: flex; align-items: center; gap: 10px; margin-top: 15px; color: #83c99c; font-family: var(--font-display); font-size: 15px; font-weight: 700; }
+.rescue-route-card__path svg { color: #77969d; }
+.rescue-route-card__metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; margin-top: 14px; padding-top: 11px; border-top: 1px solid var(--line-soft); }
+.rescue-route-card__metrics > div { display: flex; flex-direction: column; gap: 5px; }
+.rescue-route-card__metrics strong { color: #d8e4e5; font-family: var(--font-display); font-size: 11px; }
+.rescue-route-card__metrics span { color: #6f838b; font-size: 6px; font-weight: 700; letter-spacing: .09em; }
+.rescue-route-card__empty { align-items: flex-start; flex-direction: column; }
+.rescue-operations__main-grid { display: grid; grid-template-columns: minmax(0,1.25fr) minmax(290px,.75fr); gap: 11px; margin-top: 12px; }
+.rescue-team-panel__header .section-heading { align-items: center; }
+.rescue-team-panel__count { color: #70868d; font-size: 6px; font-weight: 700; letter-spacing: .09em; }
+.rescue-team-list { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; margin-top: 11px; }
+.rescue-team-card { display: flex; min-width: 0; flex-direction: column; gap: 9px; padding: 10px; border: 1px solid var(--line-soft); border-radius: 4px; background: rgba(255,255,255,.012); }
+.rescue-team-card.is-recommended { border-color: rgba(114,196,154,.35); background: rgba(114,196,154,.035); box-shadow: inset 0 1px 0 rgba(114,196,154,.08); }
+.rescue-team-card.is-dispatched { border-color: rgba(83,199,220,.32); background: rgba(83,199,220,.035); }
+.rescue-team-card__heading { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.rescue-team-card__icon { display: grid; width: 26px; height: 26px; flex: 0 0 auto; place-items: center; border: 1px solid currentColor; border-radius: 4px; background: rgba(255,255,255,.02); }
+.rescue-team-card__icon--success { color: var(--green); }
+.rescue-team-card__icon--info { color: var(--cyan); }
+.rescue-team-card__icon--warning { color: var(--amber); }
+.rescue-team-card__icon--critical { color: var(--red); }
+.rescue-team-card__heading > div { display: flex; flex: 1; flex-direction: column; gap: 3px; min-width: 0; }
+.rescue-team-card__heading > div strong { overflow: hidden; color: #dbe5e6; font-family: var(--font-display); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.rescue-team-card__heading > div span { overflow: hidden; color: #768a92; font-size: 6px; text-overflow: ellipsis; white-space: nowrap; }
+.rescue-team-card__heading .status-badge { min-height: 17px; padding: 2px 5px; font-size: 5px; }
+.rescue-team-card__location { display: flex; align-items: center; gap: 5px; color: #8da1a7; font-size: 7px; }
+.rescue-team-card__location svg { color: var(--cyan); }
+.rescue-team-card__destination { margin-left: auto; color: #75bfd0; font-size: 5px; font-weight: 700; letter-spacing: .07em; }
+.rescue-team-card__metrics { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px 5px; padding-top: 8px; border-top: 1px solid rgba(136,168,185,.08); }
+.rescue-team-card__metrics > div { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.rescue-team-card__metrics > div > span { color: #687f87; font-size: 5px; font-weight: 700; letter-spacing: .08em; }
+.rescue-team-card__metrics strong { overflow: hidden; color: #d4e0e1; font-family: var(--font-display); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.rescue-team-card__metrics strong small { color: #83969b; font-family: var(--font-body); font-size: 5px; }
+.rescue-team-card__metrics strong.is-yes { color: #8ccca3; }
+.rescue-team-card__metrics strong.is-no { color: #8b9a9d; }
+.rescue-team-card__recommendation { display: flex; align-items: center; gap: 4px; color: #83c99c; font-size: 5px; font-weight: 700; letter-spacing: .04em; }
+.rescue-recommendation-card { border-color: rgba(114,196,154,.2); background: linear-gradient(150deg,rgba(114,196,154,.045),transparent 58%),var(--panel); }
+.rescue-recommendation-card__team { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.rescue-recommendation-card__icon { display: grid; width: 32px; height: 32px; flex: 0 0 auto; place-items: center; border: 1px solid rgba(114,196,154,.24); border-radius: 4px; color: var(--green); background: rgba(114,196,154,.06); }
+.rescue-recommendation-card__team > div { display: flex; flex: 1; flex-direction: column; gap: 3px; min-width: 0; }
+.rescue-recommendation-card__team > div > span { color: #71858b; font-size: 6px; font-weight: 700; letter-spacing: .1em; }
+.rescue-recommendation-card__team > div > strong { color: #e0ece6; font-family: var(--font-display); font-size: 12px; }
+.rescue-recommendation-card__metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; margin-top: 13px; padding: 10px 0; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); }
+.rescue-recommendation-card__metrics > div { display: flex; min-width: 0; flex-direction: column; gap: 5px; }
+.rescue-recommendation-card__metrics strong { overflow: hidden; color: #dce8e2; font-family: var(--font-display); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.rescue-recommendation-card__metrics span { color: #72877e; font-size: 5px; font-weight: 700; letter-spacing: .08em; }
+.rescue-recommendation-card__distance { display: flex; align-items: center; gap: 5px; margin-top: 9px; color: #9aaba9; font-size: 7px; }
+.rescue-recommendation-card__distance svg { color: var(--cyan); }
+.rescue-recommendation-card__distance strong { color: #dce5e4; }
+.rescue-recommendation-card__location { margin-left: auto; color: #778c91; }
+.rescue-recommendation-card__reason { display: flex; align-items: flex-start; gap: 6px; margin-top: 10px; padding: 8px; border-left: 2px solid var(--green); background: rgba(114,196,154,.045); color: #b2cbb9; font-size: 7px; line-height: 1.4; }
+.rescue-recommendation-card__reason svg { flex: 0 0 auto; color: var(--green); }
+.rescue-recommendation-card__detail { margin: 8px 0 0; color: #829892; font-size: 6px; line-height: 1.45; }
+.rescue-dispatch-button { width: 100%; margin-top: 12px; }
+.rescue-recommendation-card__empty { display: flex; min-height: 150px; flex-direction: column; align-items: center; justify-content: center; gap: 9px; margin-top: 10px; border: 1px dashed rgba(242,184,94,.2); background: rgba(242,184,94,.025); color: var(--amber); text-align: center; }
+.rescue-recommendation-card__empty strong { color: #e6d5b3; font-size: 8px; letter-spacing: .08em; }
+.rescue-recommendation-card__empty span { color: #a7987c; font-size: 7px; }
+.rescue-recommendation-card__empty--waiting { border-color: rgba(83,199,220,.2); background: rgba(83,199,220,.025); color: var(--cyan); }
+.rescue-recommendation-card__empty--waiting strong { color: #c1dfe2; }
+.rescue-recommendation-card__empty--waiting span { color: #8daeb3; }
+.rescue-team-list__empty, .rescue-timeline-card__empty { padding: 17px 8px; color: #82969b; font-size: 8px; line-height: 1.5; text-align: center; }
+.rescue-operations__fallback { display: flex; align-items: center; gap: 9px; margin-top: 11px; padding: 10px 12px; border: 1px solid rgba(242,184,94,.25); background: rgba(242,184,94,.035); color: var(--amber); }
+.rescue-operations__fallback > div { display: flex; flex-direction: column; gap: 3px; }
+.rescue-operations__fallback strong { color: #e6d5b3; font-size: 8px; letter-spacing: .08em; }
+.rescue-operations__fallback span { color: #a7987c; font-size: 7px; }
+.rescue-timeline-card { margin-top: 12px; }
+.rescue-timeline-card__heading { display: flex; align-items: center; justify-content: space-between; }
+.rescue-timeline-card__heading > svg { color: #748b92; }
+.rescue-timeline-list { display: flex; flex-direction: column; margin-top: 10px; }
+.rescue-operations__footer { margin-top: 13px; }
+
+@media (max-width: 1120px) {
+  .rescue-operations__main-grid { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 760px) {
+  .rescue-operations__heading { align-items: flex-start; }
+  .rescue-operations__summary-grid { grid-template-columns: minmax(0,1fr); }
+  .rescue-incident-card__header, .rescue-route-card__header { align-items: flex-start; flex-direction: column; }
+  .rescue-operations__prerequisite { align-items: flex-start; flex-direction: column; }
+  .rescue-operations__prerequisite .button { width: 100%; }
+}
+@media (max-width: 520px) {
+  .rescue-operations__notice { align-items: flex-start; }
+  .rescue-team-list { grid-template-columns: minmax(0,1fr); }
+  .rescue-team-card__heading > div > strong { font-size: 9px; }
+  .rescue-incident-card__facts { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .rescue-incident-card__location > span { font-size: 5px; }
+  .rescue-route-card__path { font-size: 12px; }
+}

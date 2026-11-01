@@ -48,12 +48,12 @@ import {
   type DataColumn,
 } from "@/components/system/ui";
 
-export type OperationsPage = "command" | "citizen-sos" | "ai-triage" | "safe-routing";
+export type OperationsPage = "command" | "citizen-sos" | "ai-triage" | "safe-routing" | "rescue-operations";
 
 const navigation = [
   { label: "Command Center", icon: LayoutDashboard, route: "/", activePage: "command" },
   { label: "Live Incidents", icon: Radio, phase: "NEXT" },
-  { label: "Rescue Operations", icon: Truck, phase: "NEXT" },
+  { label: "Rescue Operations", icon: Truck, route: "/rescue-operations", activePage: "rescue-operations" },
   { label: "Shelters & Resources", icon: Building2, phase: "NEXT" },
   { label: "Citizen SOS", icon: LifeBuoy, route: "/citizen-sos", activePage: "citizen-sos" },
   { label: "AI Triage", icon: BrainCircuit, route: "/ai-triage", activePage: "ai-triage" },
@@ -144,7 +144,7 @@ export function NavigationRail({
           <div><strong>SYSTEM {systemStatus.system.toUpperCase()}</strong><span>Network {systemStatus.network.toLowerCase()} · sync {systemStatus.dataSync.toLowerCase()}</span></div>
           <CheckCircle2 size={15} aria-hidden="true" />
         </div>
-        <div className="sidebar__version">RAKSHA <span>•</span> {activePage === "command" ? "COMMAND CENTER · PHASE 1" : activePage === "citizen-sos" ? "CITIZEN SOS · PHASE 2" : activePage === "ai-triage" ? "AI TRIAGE · PHASE 3" : "SAFE ROUTING · PHASE 4"}</div>
+        <div className="sidebar__version">RAKSHA <span>•</span> {activePage === "command" ? "COMMAND CENTER · PHASE 1" : activePage === "citizen-sos" ? "CITIZEN SOS · PHASE 2" : activePage === "ai-triage" ? "AI TRIAGE · PHASE 3" : activePage === "safe-routing" ? "SAFE ROUTING · PHASE 4" : "RESCUE OPERATIONS · PHASE 5"}</div>
       </aside>
     </>
   );
@@ -377,7 +377,8 @@ function MapPanel({ incidents, rescueTeams, shelters, riskZones, waterLevel, onS
             <span className="section-eyebrow">RESCUE UNIT · SIMULATED</span>
             <strong>{selectedTeam.name}</strong>
             <span>{selectedTeam.role} · {selectedTeam.status.toUpperCase()}</span>
-            <small>{selectedTeam.assignedIncidentId ? `Incident #${selectedTeam.assignedIncidentId} · ETA ${selectedTeam.etaMinutes} min` : `${selectedTeam.location} · Ready for deployment`}</small>
+            <small>{selectedTeam.assignedIncidentId ? `Incident #${selectedTeam.assignedIncidentId} · Destination ${incidents.find((incident) => incident.id === selectedTeam.assignedIncidentId)?.location ?? selectedTeam.location} · ETA ${selectedTeam.etaMinutes} min` : `${selectedTeam.location} · Ready for deployment`}</small>
+            <small>{selectedTeam.capacity ? `Capacity ${selectedTeam.capacity} · ` : ""}Medical support {selectedTeam.medicalSupport ? "YES" : "NO"}</small>
           </>}
           {selectedShelter && <>
             <span className="section-eyebrow">SHELTER · SIMULATED</span>
@@ -405,11 +406,12 @@ function MapPanel({ incidents, rescueTeams, shelters, riskZones, waterLevel, onS
   );
 }
 
-function IncidentDetail({ incident, onClose }: { incident: Incident; onClose: () => void }) {
+function IncidentDetail({ incident, rescueTeams, onClose }: { incident: Incident; rescueTeams: RescueTeam[]; onClose: () => void }) {
   const isPrimary = incident.id === "1042";
   const isCitizenSOS = incident.source === "Citizen SOS";
   const triageComplete = incident.triageStatus === "Complete";
   const manualReview = incident.triageStatus === "Manual review required";
+  const assignedTeam = rescueTeams.find((team) => team.id === incident.rescueTeamId);
   const statusTone = incident.status === "Awaiting rescue" || incident.status === "Triaged — Critical" ? "critical" : incident.status === "Contained" ? "success" : "info";
   return (
     <Dialog title={`INCIDENT #${incident.id}`} eyebrow="SIMULATED INCIDENT RECORD · VIEW ONLY" onClose={onClose} footer={<Button variant="secondary" onClick={onClose}>Close details</Button>}>
@@ -448,18 +450,23 @@ function IncidentDetail({ incident, onClose }: { incident: Incident; onClose: ()
         <strong>NO SAFE ROUTE AVAILABLE</strong>
         <small>Manual operator review required.</small>
       </section>}
+      {incident.status === "Rescue dispatched" && assignedTeam && <section className="incident-detail__dispatch" aria-label="Rescue dispatch">
+        <div><span className="section-eyebrow">RESCUE RESPONSE</span><StatusBadge tone="info" dot>RESCUE DISPATCHED</StatusBadge></div>
+        <strong>{assignedTeam.name}</strong>
+        <small>ETA {incident.rescueEtaMinutes ?? assignedTeam.etaMinutes ?? "—"} MIN · EN ROUTE TO {incident.location.toUpperCase()}</small>
+      </section>}
       {incident.timeline.length > 0 && <section className="incident-detail__timeline">
         <span className="section-eyebrow">INCIDENT TIMELINE</span>
         <div className="incident-detail__timeline-list">
           {incident.timeline.map((event, index) => <TimelineItem key={`${event.time}-${event.title}`} icon={event.tone === "red" ? AlertTriangle : CircleDot} title={event.title} detail={event.detail} time={event.time} tone={event.tone} last={index === incident.timeline.length - 1} />)}
         </div>
       </section>}
-      <div className="incident-detail__notice"><Shield size={15} /><span>Simulated demo information only · local triage rules do not contact live AI services or dispatch a team.</span></div>
+      <div className="incident-detail__notice"><Shield size={15} /><span>Simulated demo information only · no live AI service or external dispatch is connected.</span></div>
     </Dialog>
   );
 }
 
-function IncidentPanel({ incidents, onSelectIncident }: { incidents: Incident[]; onSelectIncident: (incidentId: string) => void }) {
+function IncidentPanel({ incidents, rescueTeams, onSelectIncident }: { incidents: Incident[]; rescueTeams: RescueTeam[]; onSelectIncident: (incidentId: string) => void }) {
   const rows = useMemo(() => {
     const citizenReports = incidents.filter((incident) => incident.source === "Citizen SOS").sort((a, b) => Number(b.id) - Number(a.id));
     const pinned = ["1042", "1041", "1038"].map((id) => incidents.find((incident) => incident.id === id)).filter((incident): incident is Incident => incident !== undefined);
@@ -471,7 +478,7 @@ function IncidentPanel({ incidents, onSelectIncident }: { incidents: Incident[];
   const criticalCount = incidents.filter((incident) => incident.severity === "Critical").length;
   const columns: DataColumn<Incident>[] = [
     { key: "priority", title: "PRI", render: (row) => <SeverityBadge severity={row.severity} priority={row.priority} compact /> },
-    { key: "incident", title: "PRIORITY INCIDENTS", render: (row) => <div className="incident-cell"><strong>{row.type}</strong><span>#{row.id} <i /> {row.location} · {row.peopleAffected} people</span>{row.source === "Citizen SOS" && <small className="incident-cell__status">{row.triageStatus === "Complete" ? `TRIAGED — ${row.severity.toUpperCase()} · ${row.priority}` : row.triageStatus === "Manual review required" ? "MANUAL REVIEW REQUIRED" : "SOS RECEIVED · PENDING TRIAGE"}</small>}</div> },
+    { key: "incident", title: "PRIORITY INCIDENTS", render: (row) => <div className="incident-cell"><strong>{row.type}</strong><span>#{row.id} <i /> {row.location} · {row.peopleAffected} people</span>{row.source === "Citizen SOS" && <small className="incident-cell__status">{row.status === "Rescue dispatched" ? `RESCUE DISPATCHED · ${rescueTeams.find((team) => team.id === row.rescueTeamId)?.name ?? "TEAM ASSIGNED"} · ETA ${row.rescueEtaMinutes ?? "—"} MIN` : row.triageStatus === "Complete" ? `TRIAGED — ${row.severity.toUpperCase()} · ${row.priority}` : row.triageStatus === "Manual review required" ? "MANUAL REVIEW REQUIRED" : "SOS RECEIVED · PENDING TRIAGE"}</small>}</div> },
     { key: "age", title: "AGE", align: "right", className: "incident-age", render: (row) => <span>{row.reportedAt}</span> },
   ];
   return (
@@ -497,13 +504,13 @@ function ReadinessPanel({ rescueTeams }: { rescueTeams: RescueTeam[] }) {
       <div className="readiness-panel__summary"><strong>{availableCount.toString().padStart(2, "0")}</strong><span>teams available</span><span className="readiness-panel__divider" /><strong>{rescueTeams.length.toString().padStart(2, "0")}</strong><span>units reporting</span></div>
       <div className="team-list">
         {featured.map((team) => {
-          const tone = team.status === "On scene" ? "critical" : team.status === "En route" || team.status === "Mobilizing" ? "warning" : "success";
-          const subline = team.assignedIncidentId ? `Incident #${team.assignedIncidentId} · ETA ${team.etaMinutes} min` : team.role === "Medical support" ? "Medical support · Available" : "Ready for deployment";
+          const tone = team.status === "On scene" || team.status === "Unavailable" ? "critical" : team.status === "En route" ? "info" : team.status === "Mobilizing" || team.status === "Busy" ? "warning" : "success";
+          const subline = team.assignedIncidentId ? `Incident #${team.assignedIncidentId} · ETA ${team.etaMinutes} min` : team.status === "Available" ? `${team.location} · Ready for deployment` : `${team.location} · ${team.status.toUpperCase()}`;
           return (
             <div className="team-row" key={team.id}>
               <span className={`team-row__icon team-row__icon--${tone}`}><Truck size={15} /></span>
               <div className="team-row__details"><strong>{team.name}</strong><span>{subline}</span></div>
-              <div className="team-row__status"><StatusBadge tone={tone}>{team.status.toUpperCase()}</StatusBadge><ProgressIndicator value={team.availability} showValue={false} tone={team.status === "En route" || team.status === "Mobilizing" ? "amber" : team.status === "On scene" ? "red" : "green"} /></div>
+              <div className="team-row__status"><StatusBadge tone={tone}>{team.status.toUpperCase()}</StatusBadge><ProgressIndicator value={team.availability} showValue={false} tone={team.status === "En route" ? "blue" : team.status === "Mobilizing" || team.status === "Busy" ? "amber" : team.status === "On scene" || team.status === "Unavailable" ? "red" : "green"} /></div>
             </div>
           );
         })}
@@ -636,7 +643,7 @@ export default function CommandCenter() {
 
             <section className="dashboard-grid" aria-label="Map and priority incidents">
               <MapPanel incidents={state.incidents} rescueTeams={state.rescueTeams} shelters={state.shelters} riskZones={state.riskZones} waterLevel={primaryRiskZone?.waterLevel ?? 0} onSelectIncident={onSelectIncident} />
-              <IncidentPanel incidents={state.incidents} onSelectIncident={onSelectIncident} />
+              <IncidentPanel incidents={state.incidents} rescueTeams={state.rescueTeams} onSelectIncident={onSelectIncident} />
             </section>
 
             <section className="support-grid" aria-label="Response readiness and system status">
@@ -649,7 +656,7 @@ export default function CommandCenter() {
           </div>
         </div>
       </main>
-      {selectedIncident && <IncidentDetail incident={selectedIncident} onClose={() => setSelectedIncidentId(null)} />}
+      {selectedIncident && <IncidentDetail incident={selectedIncident} rescueTeams={state.rescueTeams} onClose={() => setSelectedIncidentId(null)} />}
     </div>
   );
 }

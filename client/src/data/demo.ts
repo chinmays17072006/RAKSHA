@@ -85,9 +85,9 @@ export const demoOperations: OperationsState = {
     },
   ],
   rescueTeams: [
-    { id: "team-bravo", name: "TEAM BRAVO", members: 3, status: "En route", location: "Sector 04 approach", vehicle: "High-water rescue unit", availability: 84, role: "Flood rescue", coordinates: { x: 55, y: 49 }, assignedIncidentId: "1042", etaMinutes: 11 },
-    { id: "team-alpha", name: "TEAM ALPHA", members: 4, status: "Available", location: "Sector 03 staging point", vehicle: "Rapid response", availability: 100, role: "Rescue response", coordinates: { x: 35, y: 58 } },
-    { id: "team-charlie", name: "TEAM CHARLIE", members: 5, status: "Available", location: "Sector 05 medical post", vehicle: "Medical transport", availability: 100, role: "Medical support", coordinates: { x: 69, y: 62 } },
+    { id: "team-bravo", name: "TEAM BRAVO", members: 3, capacity: 6, medicalSupport: true, distanceKm: 2.1, status: "Available", location: "Sector 04", vehicle: "High-water rescue unit", availability: 100, role: "Flood rescue", coordinates: { x: 55, y: 49 }, etaMinutes: 11 },
+    { id: "team-alpha", name: "TEAM ALPHA", members: 4, capacity: 4, medicalSupport: false, distanceKm: 5.8, status: "Available", location: "Sector 02", vehicle: "Rapid response", availability: 100, role: "Rescue response", coordinates: { x: 35, y: 58 }, etaMinutes: 14 },
+    { id: "team-charlie", name: "TEAM CHARLIE", members: 5, capacity: 8, medicalSupport: true, distanceKm: 3.4, status: "Busy", location: "Sector 06", vehicle: "Medical transport", availability: 65, role: "Medical support", coordinates: { x: 69, y: 62 }, etaMinutes: 18 },
     { id: "team-delta", name: "TEAM DELTA", members: 4, status: "Available", location: "Sector 01 depot", vehicle: "High-clearance unit", availability: 100, role: "Rescue response", coordinates: { x: 17, y: 35 } },
     { id: "team-echo", name: "TEAM ECHO", members: 4, status: "Available", location: "Sector 09 staging point", vehicle: "Water rescue", availability: 100, role: "Water rescue", coordinates: { x: 82, y: 57 } },
     { id: "team-foxtrot", name: "TEAM FOXTROT", members: 3, status: "Available", location: "Sector 02 depot", vehicle: "Rapid response", availability: 100, role: "Rescue response", coordinates: { x: 14, y: 61 } },

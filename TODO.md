@@ -291,3 +291,90 @@ After completing Phase 1, stop and provide: (1) what was implemented; (2) what i
 - Responsive check: a 390 px route shell measured document/body width 390 px with no horizontal overflow. The route page CSS stacks the map/result comparisons at tablet widths and the shelter cards at mobile widths.
 - Validation passed: `pnpm check`; `pnpm test` (15 tests across 4 files); `pnpm build`. `/safe-routing` and `/manus-routes.json` returned HTTP 200, and the manifest contains all four declared page routes. No application runtime error was observed in the completed end-to-end flow.
 - Known non-blocking build warnings remain from the starter's classic `/api/platform/config.js` script and Vite's >500 kB bundle notice. Operational data remains local/in-memory; no live navigation, dispatch, or backend persistence is connected.
+
+
+## Phase 5 — Rescue Operations — Complete
+
+### 49. Preserve the existing RAKSHA project and limit scope to Phase 5 — Complete
+- Continue working on the existing RAKSHA project. Phases 0–4 are complete. Do NOT rebuild the application, redesign it, refactor unrelated code, install unnecessary packages, create a backend, use external APIs, or start Phase 6, 7, 8, 9, or 10.
+- Implement ONLY Phase 5: Rescue Operations. Reuse existing components, centralized state, types, demo data, styling, routing, layouts, and utilities from Phases 0–4. Make the smallest possible code changes and optimize for the stated remaining budget of 968 Manus credits.
+- Preserve the existing end-to-end flow: Citizen SOS → AI Triage → CRITICAL/P0 → Safe Route → Road C → Shelter 07. Do not break any of this functionality.
+
+### 50. Use the same Incident #1043 and preserve its safe route — Complete
+- Use the existing centralized Incident #1043. Do NOT create a second independent incident object. Incident #1043 is Flash Flood; Sector 04; priority P0; severity CRITICAL; 4 people affected; 1 elderly person; immediate rescue required.
+- Preserve its Phase 4 route: Road C → Shelter 07; distance 6.2 km; ETA 11 min; risk LOW. Do not replace, clear, or duplicate this route when recommending or dispatching a rescue team.
+
+### 51. Reuse centralized team records and select a deterministic response unit — Complete
+- Use deterministic local/demo rescue-team data. Reuse and modify the existing centralized team records rather than creating duplicate team structures.
+- Team Alpha: AVAILABLE; Sector 02; capacity 4 people; medical capability NO; distance to Incident #1043 is 5.8 km; ETA 14 min.
+- Team Bravo: AVAILABLE; Sector 04; capacity 6 people; medical capability YES; distance to Incident #1043 is 2.1 km; ETA 11 min.
+- Team Charlie: BUSY; Sector 06; capacity 8 people; medical capability YES; distance to Incident #1043 is 3.4 km; ETA 18 min.
+- Implement a lightweight deterministic local selection function. For Incident #1043 the recommended team MUST be TEAM BRAVO. Consider: 1) team must be AVAILABLE; 2) capacity must be sufficient for 4 people; 3) prefer medical support because one elderly person is involved; 4) prefer lower ETA/distance. Do NOT use real AI or external services.
+- Show the exact selection reason: “Team Bravo is the closest available team with sufficient capacity and medical support for the incident.”
+
+### 52. Activate Rescue Operations within the existing navigation and shell — Complete
+- Activate/use the existing Rescue Operations navigation item; do not create another navigation system.
+- The Rescue Operations page must match the existing RAKSHA design and reuse its application shell, layout, controls, and styling rather than redesigning existing pages.
+
+### 53. Show Incident #1043 and its existing route on the response page — Complete
+- Show a prominent INCIDENT #1043 summary with FLASH FLOOD; SECTOR 04; CRITICAL; P0; 4 PEOPLE; 1 ELDERLY; IMMEDIATE RESCUE REQUIRED.
+- Also show the existing route: ROAD C → SHELTER 07; 6.2 KM; 11 MIN; LOW RISK.
+
+### 54. Display all three rescue teams and status styling — Complete
+- Display Team Alpha, Team Bravo, and Team Charlie. Each team shows team name, status, current location, capacity, medical capability, distance, and ETA.
+- Status styling: AVAILABLE → green; EN ROUTE → blue/cyan; BUSY → amber; UNAVAILABLE → red.
+- Team Bravo is visually emphasized as the recommended team.
+
+### 55. Show the recommended response unit — Complete
+- Create a prominent operational panel titled RECOMMENDED RESPONSE UNIT. Show TEAM BRAVO; AVAILABLE; ETA: 11 MIN; CAPACITY: 6 PEOPLE; MEDICAL SUPPORT: AVAILABLE; Distance: 2.1 KM; a clear RECOMMENDED indicator.
+- Show the recommendation reason: “Closest available team with sufficient capacity and medical support.”
+
+### 56. Dispatch Team Bravo and update shared state atomically — Complete
+- Provide a functional DISPATCH TEAM BRAVO button. On click, change Team Bravo status AVAILABLE → EN ROUTE; update the same Incident #1043 to RESCUE DISPATCHED; show ETA: 11 MIN; add the timeline event “Team Bravo dispatched to Incident #1043.”; and show the visible confirmation “Team Bravo is now en route.”
+- Update the centralized shared state. The button must NOT merely change its visual text. Update the same shared rescue-team and incident records used by the rest of the application.
+- Do not lose or modify Incident #1043’s CRITICAL/P0 triage fields or Phase 4 Road C → Shelter 07 route during dispatch.
+
+### 57. Show a concise, shared rescue timeline — Complete
+- Display a concise operational timeline and use the existing incident timeline/state model if available.
+- Demo sequence: SOS received; AI triage completed; critical priority assigned; safe route identified; Team Bravo recommended; Team Bravo dispatched; 11 min ETA — rescue team en route.
+- Do not fabricate unnecessary complex timestamps if the existing application uses a different time model. Keep the timeline deterministic and demo-friendly.
+
+### 58. Reflect dispatch on the existing Command Center — Complete
+- After Team Bravo is dispatched, the existing Command Center must reflect Incident #1043; CRITICAL / P0; RESCUE DISPATCHED; TEAM BRAVO; ETA 11 MIN.
+- Do NOT create a separate incident record. Use the same centralized Incident #1043 already used by Citizen SOS, AI Triage, Safe Routing, and Command Center; the state change must propagate correctly.
+- Existing Road C and Shelter 07 information must remain intact and visible.
+
+### 59. Reflect Team Bravo's assignment in existing team details — Complete
+- If the existing application supports team popovers/details, extend the existing component rather than creating a new UI system.
+- After dispatch, Team Bravo shows status EN ROUTE; incident #1043; destination Sector 04; ETA 11 MIN; capacity 6; medical support YES.
+
+### 60. Show a no-available-team fallback — Complete
+- If there is no suitable available rescue team, show NO AVAILABLE RESCUE TEAM and MANUAL OPERATOR REVIEW REQUIRED. Do not break the normal Team Bravo demo scenario.
+
+### 61. Preserve visual identity and responsive behavior — Complete
+- Match the existing RAKSHA design system exactly: dark emergency operations interface; deep charcoal/navy background; white/off-white typography; muted blue/cyan operational information; green for available/safe; amber for warning/busy; red for critical; use Lucide icons where already used.
+- Keep the interface professional and compact. Do NOT add excessive rounded cards, huge gradients, rainbow colors, childish graphics, generic Bootstrap styling, unnecessary animations, or decorative features that consume credits. Functionality is more important than visual effects.
+- Verify desktop, tablet, and 390px mobile; there must be NO HORIZONTAL OVERFLOW. Do not redesign the responsive system if it already works.
+
+### 62. Phase 5 acceptance, regression protection, and technical quality — Complete
+- Rescue Operations: verify the page loads; Incident #1043 appears; Team Alpha, Team Bravo, and Team Charlie appear; Team Bravo is recommended; the reason is visible; ETA is 11 minutes; capacity is 6 people; medical support is available; dispatch works; Team Bravo changes AVAILABLE → EN ROUTE; Incident #1043 changes to RESCUE DISPATCHED; the rescue timeline updates; Command Center reflects Team Bravo and RESCUE DISPATCHED; the existing Road C route and Shelter 07 information remain intact.
+- Regression: verify Citizen SOS still works; AI Triage still works; Incident #1042 still works; Safe Routing still works; existing Command Center still works; existing navigation still works.
+- Technical: TypeScript check passes; production build passes; no blocking browser console errors; 390px layout has no horizontal overflow.
+
+### 63. Credit control, stop condition, and final handoff — Complete
+- Because only 968 credits remain, do NOT rebuild the project, regenerate existing pages, rewrite the architecture, install unnecessary dependencies, add backend infrastructure, databases, external APIs, paid map services, live GPS, broad CSS redesign, or unrelated modifications. Reuse existing project capabilities and prefer small targeted edits.
+- After Phase 5 is implemented and tested, STOP. Do NOT automatically continue to Phase 6; do not add extra features or optional polish.
+- Final report must include: 1) what was implemented; 2) files changed; 3) tests performed; 4) test results; 5) browser validation; 6) errors/warnings; 7) known limitations; 8) Git commit hash; 9) confirmation the worktree is clean; 10) remaining Manus credits if available.
+- Final expected demo: SOS → AI TRIAGE → CRITICAL/P0 → ROAD C → SHELTER 07 → TEAM BRAVO → DISPATCHED → 11 MIN ETA. STOP AFTER PHASE 5.
+
+## Phase 5 verification record — Complete
+
+- `pnpm check`: passed with no TypeScript errors.
+- `pnpm test`: passed, 6 test files and 22 tests. The new dispatch tests cover atomic shared incident/team updates, preserved CRITICAL/P0 and Road C route data, persisted ETA history, guard rejection, and immutability.
+- `pnpm build`: passed. Non-blocking existing build notices remain for `/api/platform/config.js` script bundling and the >500 kB JavaScript chunk.
+- `git diff --check`: passed.
+- HTTP verification: `/rescue-operations` and `/manus-routes.json` returned 200; manifest exactly matches all five registered application routes.
+- Browser end-to-end: fictional SOS → #1043 → local AI Triage CRITICAL/P0 → Road C → Shelter 07 → Team Bravo dispatch. The page and Command Center showed RESCUE DISPATCHED, Team Bravo EN ROUTE, ETA 11 min, route preserved, and the shared incident timeline included TEAM EN ROUTE / ETA 11 MIN.
+- Responsive verification: full post-dispatch flow at 390px showed no horizontal overflow. The no-incident state at 390px, 768px, and 1024px also showed no overflow and did not incorrectly show the no-team warning.
+- Regression checks: existing Citizen SOS, AI Triage, Safe Routing, Command Center navigation, Team Bravo details, and Incident #1042 remained usable. Browser inspection found no blocking application console errors.
+- All response, route, and team data are simulated and local. No live emergency service or external team dispatch is connected.
