@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "wouter";
 import {
   Activity,
   AlertTriangle,
@@ -45,14 +46,24 @@ import {
   type DataColumn,
 } from "@/components/system/ui";
 
+export type OperationsPage = "command" | "citizen-sos";
+
 const navigation = [
-  { label: "Command Center", icon: LayoutDashboard, enabled: true },
+  { label: "Command Center", icon: LayoutDashboard, route: "/", activePage: "command" },
   { label: "Live Incidents", icon: Radio, phase: "NEXT" },
   { label: "Rescue Operations", icon: Truck, phase: "NEXT" },
   { label: "Shelters & Resources", icon: Building2, phase: "NEXT" },
-  { label: "Citizen SOS", icon: LifeBuoy, phase: "NEXT" },
+  { label: "Citizen SOS", icon: LifeBuoy, route: "/citizen-sos", activePage: "citizen-sos" },
   { label: "Offline Mode", icon: WifiOff, phase: "NEXT" },
 ] as const;
+
+function vulnerablePersonLabel(incident: Incident) {
+  if (incident.vulnerableDescription) return incident.vulnerableDescription;
+  if (incident.vulnerablePeople === 0 || incident.vulnerablePerson === "None") return "None reported";
+  if (incident.vulnerablePerson === "Multiple Vulnerable People") return "Multiple vulnerable people";
+  if (incident.vulnerablePerson) return `${incident.vulnerablePeople || 1} ${incident.vulnerablePerson.toLowerCase()}`;
+  return `${incident.vulnerablePeople} person(s)`;
+}
 
 function BrandMark({ small = false }: { small?: boolean }) {
   return (
@@ -66,18 +77,22 @@ function BrandMark({ small = false }: { small?: boolean }) {
   );
 }
 
-function NavigationRail({
+export function NavigationRail({
   open,
   onClose,
   onPlaceholder,
   rainfall,
   systemStatus,
+  activePage,
+  onNavigate,
 }: {
   open: boolean;
   onClose: () => void;
   onPlaceholder: (label: string) => void;
   rainfall: number;
   systemStatus: SystemStatus;
+  activePage: OperationsPage;
+  onNavigate: (path: string) => void;
 }) {
   return (
     <>
@@ -96,16 +111,17 @@ function NavigationRail({
         <div className="sidebar__section-label">OPERATIONS</div>
         <nav className="sidebar__nav">
           {navigation.map((item) => {
-            const active = "enabled" in item && item.enabled;
+            const active = "activePage" in item && item.activePage === activePage;
+            const route = "route" in item ? item.route : null;
             return (
               <NavigationItem
                 key={item.label}
                 icon={item.icon}
                 label={item.label}
                 active={active}
-                disabled={!active}
-                phase={"phase" in item ? item.phase : undefined}
-                onClick={active ? onClose : () => onPlaceholder(item.label)}
+                disabled={!route}
+                phase={route ? undefined : "phase" in item ? item.phase : undefined}
+                onClick={route ? () => { onNavigate(route); onClose(); } : () => onPlaceholder(item.label)}
               />
             );
           })}
@@ -124,20 +140,24 @@ function NavigationRail({
           <div><strong>SYSTEM {systemStatus.system.toUpperCase()}</strong><span>Network {systemStatus.network.toLowerCase()} · sync {systemStatus.dataSync.toLowerCase()}</span></div>
           <CheckCircle2 size={15} aria-hidden="true" />
         </div>
-        <div className="sidebar__version">RAKSHA <span>•</span> COMMAND CENTER · PHASE 1</div>
+        <div className="sidebar__version">RAKSHA <span>•</span> {activePage === "command" ? "COMMAND CENTER · PHASE 1" : "CITIZEN SOS · PHASE 2"}</div>
       </aside>
     </>
   );
 }
 
-function TopBar({
+export function TopBar({
   onMenu,
   onNotifications,
   systemStatus,
+  pageContext = "OPERATIONS / OVERVIEW",
+  pageTitle = "COMMAND CENTER",
 }: {
   onMenu: () => void;
   onNotifications: () => void;
   systemStatus: SystemStatus;
+  pageContext?: string;
+  pageTitle?: string;
 }) {
   const [now, setNow] = useState(() => new Date());
   const [profileOpen, setProfileOpen] = useState(false);
@@ -156,7 +176,7 @@ function TopBar({
         <button className="icon-button topbar__menu" onClick={onMenu} aria-label="Open navigation"><Menu size={20} /></button>
         <div className="topbar__brand"><BrandMark small /><div><strong>RAKSHA</strong><span>AI DISASTER INTELLIGENCE</span></div></div>
         <div className="topbar__divider" />
-        <div className="topbar__page"><span>OPERATIONS / OVERVIEW</span><strong>COMMAND CENTER</strong></div>
+        <div className="topbar__page"><span>{pageContext}</span><strong>{pageTitle}</strong></div>
       </div>
       <div className="topbar__right">
         <StatusBadge tone={systemStatus.dataSync === "Live" ? "success" : "warning"} dot className="live-badge">{systemStatus.dataSync === "Live" ? "LIVE MONITORING" : "MONITORING PAUSED"}</StatusBadge>
@@ -261,18 +281,18 @@ function MapLayer({
         </g>}
       </svg>
       <div className="map-marker-layer" role="group" aria-label="Simulated incident, response-team, and shelter markers">
-        {incidents.filter((incident) => incident.source === "SOS").map((incident) => (
+        {incidents.filter((incident) => incident.source === "SOS" || incident.source === "Citizen SOS").map((incident) => (
           <button
             type="button"
             key={incident.id}
-            className={`map-point map-point--sos ${incident.id === "1042" ? "map-point--primary" : ""}`}
+            className={`map-point map-point--sos ${incident.id === "1042" ? "map-point--primary" : ""} ${incident.priority === "Pending" ? "map-point--pending" : ""}`}
             style={{ left: `${incident.coordinates.x}%`, top: `${incident.coordinates.y}%` }}
             onClick={() => onSelectIncident(incident.id)}
             aria-label={`Open incident #${incident.id}, ${incident.priority} ${incident.severity}, ${incident.location}`}
             title={`#${incident.id} · ${incident.priority} · ${incident.severity}`}
           >
             <span className="map-point__icon"><LifeBuoy size={incident.id === "1042" ? 15 : 12} /></span>
-            {incident.id === "1042" ? <span className="map-point__label"><strong>#1042 <b>P0</b></strong><small>CRITICAL · SECTOR 04</small></span> : <span className="map-point__code">{incident.priority}</span>}
+            {incident.id === "1042" ? <span className="map-point__label"><strong>#1042 <b>P0</b></strong><small>CRITICAL · SECTOR 04</small></span> : <span className="map-point__code">{incident.priority === "Pending" ? "PENDING" : incident.priority}</span>}
           </button>
         ))}
         {teamsVisible && rescueTeams.slice(0, 3).map((team) => (
@@ -383,6 +403,7 @@ function MapPanel({ incidents, rescueTeams, shelters, riskZones, waterLevel, onS
 
 function IncidentDetail({ incident, onClose }: { incident: Incident; onClose: () => void }) {
   const isPrimary = incident.id === "1042";
+  const isCitizenSOS = incident.source === "Citizen SOS";
   const statusTone = incident.status === "Awaiting rescue" ? "critical" : incident.status === "Contained" ? "success" : "info";
   return (
     <Dialog title={`INCIDENT #${incident.id}`} eyebrow="SIMULATED INCIDENT RECORD · VIEW ONLY" onClose={onClose} footer={<Button variant="secondary" onClick={onClose}>Close details</Button>}>
@@ -393,17 +414,21 @@ function IncidentDetail({ incident, onClose }: { incident: Incident; onClose: ()
       </div>
       <div className="incident-detail__location"><MapPin size={16} /><span><strong>{incident.location}</strong><small>Fictional demo location · received {incident.reportedAt}</small></span></div>
       <div className="incident-detail__facts">
+        <div><span>EVENT</span><strong>{incident.type}</strong></div>
         <div><span>LOCATION</span><strong>{incident.location}</strong></div>
-        <div><span>PEOPLE AFFECTED</span><strong>{incident.peopleAffected}</strong></div>
-        <div><span>VULNERABLE PERSON</span><strong>{incident.vulnerableDescription ?? (incident.vulnerablePeople ? `${incident.vulnerablePeople} person(s)` : "None reported")}</strong></div>
-        <div><span>PRIORITY</span><strong>{incident.priority}</strong></div>
+        <div><span>PEOPLE</span><strong>{incident.peopleAffected}</strong></div>
+        <div><span>VULNERABLE</span><strong>{vulnerablePersonLabel(incident)}</strong></div>
+        <div><span>PRIORITY</span><strong>{incident.priority === "Pending" ? "PENDING TRIAGE" : incident.priority}</strong></div>
+        <div><span>SEVERITY</span><strong>{incident.severity.toUpperCase()}</strong></div>
+        <div><span>STATUS</span><strong>{incident.status.toUpperCase()}</strong></div>
+        <div><span>SOURCE</span><strong>{incident.source.toUpperCase()}</strong></div>
       </div>
       <blockquote className="incident-detail__message">“{incident.message}”</blockquote>
-      {isPrimary && <>
-        <section className="incident-detail__recommendation" aria-label="Demonstration recommendation">
+      {(isPrimary || isCitizenSOS) && <>
+        {isPrimary && <section className="incident-detail__recommendation" aria-label="Demonstration recommendation">
           <div><span>RECOMMENDED ACTION</span><strong>Immediate rescue required.</strong><small>For now, this is a demo recommendation.</small></div>
           <div><span>MEDICAL SUPPORT</span><strong>Recommended</strong></div>
-        </section>
+        </section>}
         <div className="incident-detail__ai"><span><span className="section-eyebrow">AI TRIAGE</span><small>This will be connected later.</small></span><StatusBadge tone="warning">PENDING — PHASE 3</StatusBadge></div>
       </>}
       {incident.timeline.length > 0 && <section className="incident-detail__timeline">
@@ -419,15 +444,17 @@ function IncidentDetail({ incident, onClose }: { incident: Incident; onClose: ()
 
 function IncidentPanel({ incidents, onSelectIncident }: { incidents: Incident[]; onSelectIncident: (incidentId: string) => void }) {
   const rows = useMemo(() => {
+    const citizenReports = incidents.filter((incident) => incident.source === "Citizen SOS").sort((a, b) => Number(b.id) - Number(a.id));
     const pinned = ["1042", "1041", "1038"].map((id) => incidents.find((incident) => incident.id === id)).filter((incident): incident is Incident => incident !== undefined);
-    const pinnedIds = new Set(pinned.map((incident) => incident.id));
-    const additional = incidents.filter((incident) => !pinnedIds.has(incident.id)).sort((a, b) => Number(a.priority.slice(1)) - Number(b.priority.slice(1))).slice(0, 3);
-    return [...pinned, ...additional];
+    const pinnedIds = new Set([...citizenReports, ...pinned].map((incident) => incident.id));
+    const priorityRank = (priority: Incident["priority"]) => priority === "Pending" ? 4 : Number(priority.slice(1));
+    const additional = incidents.filter((incident) => !pinnedIds.has(incident.id)).sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority)).slice(0, 3);
+    return [...citizenReports, ...pinned, ...additional].slice(0, 6);
   }, [incidents]);
   const criticalCount = incidents.filter((incident) => incident.severity === "Critical").length;
   const columns: DataColumn<Incident>[] = [
     { key: "priority", title: "PRI", render: (row) => <SeverityBadge severity={row.severity} priority={row.priority} compact /> },
-    { key: "incident", title: "PRIORITY INCIDENTS", render: (row) => <div className="incident-cell"><strong>{row.type}</strong><span>#{row.id} <i /> {row.location} · {row.peopleAffected} people</span></div> },
+    { key: "incident", title: "PRIORITY INCIDENTS", render: (row) => <div className="incident-cell"><strong>{row.type}</strong><span>#{row.id} <i /> {row.location} · {row.peopleAffected} people</span>{row.source === "Citizen SOS" && <small className="incident-cell__status">SOS RECEIVED · PENDING TRIAGE</small>}</div> },
     { key: "age", title: "AGE", align: "right", className: "incident-age", render: (row) => <span>{row.reportedAt}</span> },
   ];
   return (
@@ -518,7 +545,7 @@ function EmergencyBanner({ incident, waterLevel, onReview }: { incident: Inciden
       <div className="emergency-banner__copy">
         <div className="emergency-banner__eyebrow"><span>ACTIVE EMERGENCY</span><i /> FLASH FLOOD WATCH <i /> SECTOR 04</div>
         <h1 id="emergency-title">Escalated water levels in the eastern floodplain</h1>
-        <p>One priority report indicates {incident.peopleAffected} people isolated, including {incident.vulnerableDescription ?? "a vulnerable person"}. Demo scenario · not a live dispatch.</p>
+        <p>One priority report indicates {incident.peopleAffected} people isolated, including {vulnerablePersonLabel(incident)}. Demo scenario · not a live dispatch.</p>
       </div>
       <div className="emergency-banner__side"><StatusBadge tone="critical" dot>P0 — CRITICAL</StatusBadge><Button variant="danger" size="sm" icon={ChevronRight} onClick={onReview}>REVIEW #1042</Button></div>
       <div className="emergency-banner__stamp"><span>WATER LEVEL</span><strong>{waterLevel.toFixed(1)}<small>m</small></strong><em><ArrowUpRight size={12} /> RISING</em></div>
@@ -528,6 +555,7 @@ function EmergencyBanner({ incident, waterLevel, onReview }: { incident: Inciden
 
 export default function CommandCenter() {
   const { state } = useOperations();
+  const [, setLocation] = useLocation();
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [refreshedAt, setRefreshedAt] = useState("just now");
@@ -551,12 +579,12 @@ export default function CommandCenter() {
     setRefreshedAt("just now");
     showToast({ title: "Situation feed refreshed", detail: "Showing the latest simulated command-center state.", tone: "success" });
   };
-  const onPlaceholder = (label: string) => showToast({ title: `${label} is planned for a later phase`, detail: "Advanced workflows remain intentionally out of scope for this Phase 1 command-center demo.", tone: "info" });
+  const onPlaceholder = (label: string) => showToast({ title: `${label} is planned for a later phase`, detail: "Advanced workflows remain intentionally out of scope for this prototype phase.", tone: "info" });
   const onSelectIncident = (incidentId: string) => setSelectedIncidentId(incidentId);
 
   return (
     <div className="app-shell">
-      <NavigationRail open={sidebarOpen} onClose={() => setSidebarOpen(false)} onPlaceholder={onPlaceholder} rainfall={primaryRiskZone?.rainfallMm ?? 0} systemStatus={state.systemStatus} />
+      <NavigationRail open={sidebarOpen} onClose={() => setSidebarOpen(false)} onPlaceholder={onPlaceholder} rainfall={primaryRiskZone?.rainfallMm ?? 0} systemStatus={state.systemStatus} activePage="command" onNavigate={setLocation} />
       <main className="app-main">
         <TopBar
           onMenu={() => setSidebarOpen(true)}

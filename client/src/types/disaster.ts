@@ -1,6 +1,6 @@
-export type Severity = "Critical" | "High" | "Medium" | "Moderate" | "Low";
-export type IncidentPriority = "P0" | "P1" | "P2" | "P3";
-export type IncidentStatus = "Awaiting rescue" | "Under review" | "Monitoring" | "Contained";
+export type Severity = "Critical" | "High" | "Medium" | "Moderate" | "Low" | "Pending triage";
+export type IncidentPriority = "P0" | "P1" | "P2" | "P3" | "Pending";
+export type IncidentStatus = "Awaiting rescue" | "Under review" | "Monitoring" | "Contained" | "SOS received";
 export type TeamStatus = "En route" | "On scene" | "Mobilizing" | "Staged" | "Available";
 export type RiskLevel = "Critical" | "High" | "Moderate" | "Safe";
 
@@ -17,13 +17,15 @@ export interface Incident {
   location: string;
   peopleAffected: number;
   vulnerablePeople: number;
+  vulnerablePerson?: string;
   vulnerableDescription?: string;
   severity: Severity;
   priority: IncidentPriority;
   status: IncidentStatus;
   reportedAt: string;
+  createdAt?: string;
   message: string;
-  source: "SOS" | "Sensor" | "Field report";
+  source: "SOS" | "Sensor" | "Field report" | "Citizen SOS";
   coordinates: { x: number; y: number };
   timeline: IncidentTimelineEvent[];
 }

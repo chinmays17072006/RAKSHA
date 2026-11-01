@@ -79,6 +79,7 @@ const severityClass: Record<Severity, string> = {
   Medium: "moderate",
   Moderate: "moderate",
   Low: "low",
+  "Pending triage": "pending",
 };
 
 const severityCode: Record<Severity, string> = {
@@ -87,6 +88,7 @@ const severityCode: Record<Severity, string> = {
   Medium: "P2",
   Moderate: "P3",
   Low: "P3",
+  "Pending triage": "PENDING",
 };
 
 export function SeverityBadge({ severity, priority, compact = false }: { severity: Severity; priority?: IncidentPriority; compact?: boolean }) {

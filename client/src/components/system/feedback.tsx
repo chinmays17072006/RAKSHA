@@ -53,26 +53,28 @@ export function Dialog({
   children,
   onClose,
   footer,
+  dismissible = true,
 }: {
   title: string;
   eyebrow?: string;
   children: ReactNode;
   onClose: () => void;
   footer?: ReactNode;
+  dismissible?: boolean;
 }) {
   const titleId = useId();
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    const onKeyDown = (event: KeyboardEvent) => { if (dismissible && event.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
+  }, [dismissible, onClose]);
 
   return (
-    <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => { if (dismissible && event.target === event.currentTarget) onClose(); }}>
       <section className="dialog" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="dialog__header">
           <div>{eyebrow && <span className="section-eyebrow">{eyebrow}</span>}<h2 id={titleId}>{title}</h2></div>
-          <button className="icon-button" onClick={onClose} aria-label="Close dialog"><X size={17} /></button>
+          {dismissible && <button className="icon-button" onClick={onClose} aria-label="Close dialog"><X size={17} /></button>}
         </div>
         <div className="dialog__body">{children}</div>
         {footer && <div className="dialog__footer">{footer}</div>}

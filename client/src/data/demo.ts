@@ -8,7 +8,7 @@ export const demoOperations: OperationsState = {
       location: "Sector 04",
       peopleAffected: 4,
       vulnerablePeople: 1,
-      vulnerableDescription: "1 elderly person",
+      vulnerablePerson: "Elderly Person",
       severity: "Critical",
       priority: "P0",
       status: "Awaiting rescue",

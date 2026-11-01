@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useReducer, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useReducer, useRef, type ReactNode } from "react";
 import { demoOperations } from "@/data/demo";
 import type { Incident, OperationsState } from "@/types/disaster";
 
@@ -9,6 +9,7 @@ type OperationsAction =
 interface OperationsContextValue {
   state: OperationsState;
   addIncident: (incident: Incident) => void;
+  createIncident: (draft: Omit<Incident, "id">) => Incident;
   updateIncident: (id: string, changes: Partial<Incident>) => void;
 }
 
@@ -18,7 +19,13 @@ function operationsReducer(state: OperationsState, action: OperationsAction): Op
   switch (action.type) {
     case "incident/add":
       if (state.incidents.some((incident) => incident.id === action.incident.id)) return state;
-      return { ...state, incidents: [action.incident, ...state.incidents] };
+      return {
+        ...state,
+        incidents: [action.incident, ...state.incidents],
+        systemStatus: action.incident.source === "Citizen SOS"
+          ? { ...state.systemStatus, activeSOSCount: state.systemStatus.activeSOSCount + 1 }
+          : state.systemStatus,
+      };
     case "incident/update":
       return {
         ...state,
@@ -33,9 +40,19 @@ function operationsReducer(state: OperationsState, action: OperationsAction): Op
 
 export function OperationsProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(operationsReducer, demoOperations);
+  const nextIncidentId = useRef(1043);
   const addIncident = useCallback((incident: Incident) => dispatch({ type: "incident/add", incident }), []);
+  const createIncident = useCallback((draft: Omit<Incident, "id">) => {
+    const usedIds = new Set(state.incidents.map((incident) => Number(incident.id)));
+    let idNumber = nextIncidentId.current;
+    while (usedIds.has(idNumber)) idNumber += 1;
+    nextIncidentId.current = idNumber + 1;
+    const incident: Incident = { ...draft, id: String(idNumber) };
+    dispatch({ type: "incident/add", incident });
+    return incident;
+  }, [state.incidents]);
   const updateIncident = useCallback((id: string, changes: Partial<Incident>) => dispatch({ type: "incident/update", id, changes }), []);
-  const value = useMemo(() => ({ state, addIncident, updateIncident }), [state, addIncident, updateIncident]);
+  const value = useMemo(() => ({ state, addIncident, createIncident, updateIncident }), [state, addIncident, createIncident, updateIncident]);
 
   return <OperationsContext.Provider value={value}>{children}</OperationsContext.Provider>;
 }
