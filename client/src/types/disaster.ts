@@ -1,6 +1,7 @@
 export type Severity = "Critical" | "High" | "Medium" | "Moderate" | "Low" | "Pending triage";
 export type IncidentPriority = "P0" | "P1" | "P2" | "P3" | "Pending";
-export type IncidentStatus = "Awaiting rescue" | "Under review" | "Monitoring" | "Contained" | "SOS received";
+export type IncidentStatus = "Awaiting rescue" | "Under review" | "Monitoring" | "Contained" | "SOS received" | "Triaged — Critical";
+export type IncidentTriageStatus = "Complete" | "Manual review required";
 export type TeamStatus = "En route" | "On scene" | "Mobilizing" | "Staged" | "Available";
 export type RiskLevel = "Critical" | "High" | "Moderate" | "Safe";
 
@@ -28,6 +29,12 @@ export interface Incident {
   source: "SOS" | "Sensor" | "Field report" | "Citizen SOS";
   coordinates: { x: number; y: number };
   timeline: IncidentTimelineEvent[];
+  triageStatus?: IncidentTriageStatus;
+  recommendedAction?: string;
+  medicalSupport?: "Recommended" | "Not indicated";
+  aiConfidence?: number;
+  aiAssessment?: string;
+  triagedAt?: string;
 }
 
 export interface RescueTeam {

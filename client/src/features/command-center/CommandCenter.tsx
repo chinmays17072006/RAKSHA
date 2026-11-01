@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import {
   Activity,
   AlertTriangle,
+  BrainCircuit,
   ArrowDownRight,
   ArrowUpRight,
   Bell,
@@ -46,7 +47,7 @@ import {
   type DataColumn,
 } from "@/components/system/ui";
 
-export type OperationsPage = "command" | "citizen-sos";
+export type OperationsPage = "command" | "citizen-sos" | "ai-triage";
 
 const navigation = [
   { label: "Command Center", icon: LayoutDashboard, route: "/", activePage: "command" },
@@ -54,6 +55,7 @@ const navigation = [
   { label: "Rescue Operations", icon: Truck, phase: "NEXT" },
   { label: "Shelters & Resources", icon: Building2, phase: "NEXT" },
   { label: "Citizen SOS", icon: LifeBuoy, route: "/citizen-sos", activePage: "citizen-sos" },
+  { label: "AI Triage", icon: BrainCircuit, route: "/ai-triage", activePage: "ai-triage" },
   { label: "Offline Mode", icon: WifiOff, phase: "NEXT" },
 ] as const;
 
@@ -140,7 +142,7 @@ export function NavigationRail({
           <div><strong>SYSTEM {systemStatus.system.toUpperCase()}</strong><span>Network {systemStatus.network.toLowerCase()} · sync {systemStatus.dataSync.toLowerCase()}</span></div>
           <CheckCircle2 size={15} aria-hidden="true" />
         </div>
-        <div className="sidebar__version">RAKSHA <span>•</span> {activePage === "command" ? "COMMAND CENTER · PHASE 1" : "CITIZEN SOS · PHASE 2"}</div>
+        <div className="sidebar__version">RAKSHA <span>•</span> {activePage === "command" ? "COMMAND CENTER · PHASE 1" : activePage === "citizen-sos" ? "CITIZEN SOS · PHASE 2" : "AI TRIAGE · PHASE 3"}</div>
       </aside>
     </>
   );
@@ -285,14 +287,14 @@ function MapLayer({
           <button
             type="button"
             key={incident.id}
-            className={`map-point map-point--sos ${incident.id === "1042" ? "map-point--primary" : ""} ${incident.priority === "Pending" ? "map-point--pending" : ""}`}
+            className={`map-point map-point--sos ${incident.id === "1042" ? "map-point--primary" : ""} ${incident.severity === "Critical" ? "map-point--critical" : incident.severity === "Pending triage" ? "map-point--pending" : ""}`}
             style={{ left: `${incident.coordinates.x}%`, top: `${incident.coordinates.y}%` }}
             onClick={() => onSelectIncident(incident.id)}
             aria-label={`Open incident #${incident.id}, ${incident.priority} ${incident.severity}, ${incident.location}`}
             title={`#${incident.id} · ${incident.priority} · ${incident.severity}`}
           >
             <span className="map-point__icon"><LifeBuoy size={incident.id === "1042" ? 15 : 12} /></span>
-            {incident.id === "1042" ? <span className="map-point__label"><strong>#1042 <b>P0</b></strong><small>CRITICAL · SECTOR 04</small></span> : <span className="map-point__code">{incident.priority === "Pending" ? "PENDING" : incident.priority}</span>}
+            {incident.id === "1042" ? <span className="map-point__label"><strong>#1042 <b>P0</b></strong><small>CRITICAL · SECTOR 04</small></span> : <span className="map-point__code">#{incident.id} · {incident.priority === "Pending" ? "PENDING" : incident.priority}</span>}
           </button>
         ))}
         {teamsVisible && rescueTeams.slice(0, 3).map((team) => (
@@ -404,7 +406,9 @@ function MapPanel({ incidents, rescueTeams, shelters, riskZones, waterLevel, onS
 function IncidentDetail({ incident, onClose }: { incident: Incident; onClose: () => void }) {
   const isPrimary = incident.id === "1042";
   const isCitizenSOS = incident.source === "Citizen SOS";
-  const statusTone = incident.status === "Awaiting rescue" ? "critical" : incident.status === "Contained" ? "success" : "info";
+  const triageComplete = incident.triageStatus === "Complete";
+  const manualReview = incident.triageStatus === "Manual review required";
+  const statusTone = incident.status === "Awaiting rescue" || incident.status === "Triaged — Critical" ? "critical" : incident.status === "Contained" ? "success" : "info";
   return (
     <Dialog title={`INCIDENT #${incident.id}`} eyebrow="SIMULATED INCIDENT RECORD · VIEW ONLY" onClose={onClose} footer={<Button variant="secondary" onClick={onClose}>Close details</Button>}>
       <div className="incident-detail__summary">
@@ -425,11 +429,12 @@ function IncidentDetail({ incident, onClose }: { incident: Incident; onClose: ()
       </div>
       <blockquote className="incident-detail__message">“{incident.message}”</blockquote>
       {(isPrimary || isCitizenSOS) && <>
-        {isPrimary && <section className="incident-detail__recommendation" aria-label="Demonstration recommendation">
-          <div><span>RECOMMENDED ACTION</span><strong>Immediate rescue required.</strong><small>For now, this is a demo recommendation.</small></div>
-          <div><span>MEDICAL SUPPORT</span><strong>Recommended</strong></div>
+        {(isPrimary || incident.recommendedAction) && <section className="incident-detail__recommendation" aria-label="Demonstration recommendation">
+          <div><span>RECOMMENDED ACTION</span><strong>{incident.recommendedAction ?? "Immediate rescue required."}</strong>{!incident.recommendedAction && <small>For now, this is a demo recommendation.</small>}</div>
+          <div><span>MEDICAL SUPPORT</span><strong>{incident.medicalSupport ?? "Recommended"}</strong></div>
         </section>}
-        <div className="incident-detail__ai"><span><span className="section-eyebrow">AI TRIAGE</span><small>This will be connected later.</small></span><StatusBadge tone="warning">PENDING — PHASE 3</StatusBadge></div>
+        <div className="incident-detail__ai"><span><span className="section-eyebrow">AI TRIAGE</span><small>{triageComplete ? `Local rule result · ${incident.aiConfidence ?? 0}% confidence` : manualReview ? "Insufficient information · operator review required" : "Local deterministic rule analysis available."}</small></span><StatusBadge tone={triageComplete ? "success" : manualReview ? "warning" : "info"}>{triageComplete ? "AI TRIAGE COMPLETE" : manualReview ? "MANUAL REVIEW REQUIRED" : "PENDING — AI TRIAGE"}</StatusBadge></div>
+        {triageComplete && incident.aiAssessment && <p className="incident-detail__ai-assessment"><strong>AI ASSESSMENT</strong>{incident.aiAssessment}</p>}
       </>}
       {incident.timeline.length > 0 && <section className="incident-detail__timeline">
         <span className="section-eyebrow">INCIDENT TIMELINE</span>
@@ -437,7 +442,7 @@ function IncidentDetail({ incident, onClose }: { incident: Incident; onClose: ()
           {incident.timeline.map((event, index) => <TimelineItem key={`${event.time}-${event.title}`} icon={event.tone === "red" ? AlertTriangle : CircleDot} title={event.title} detail={event.detail} time={event.time} tone={event.tone} last={index === incident.timeline.length - 1} />)}
         </div>
       </section>}
-      <div className="incident-detail__notice"><Shield size={15} /><span>Simulated demo information only · no dispatch or AI triage actions are connected.</span></div>
+      <div className="incident-detail__notice"><Shield size={15} /><span>Simulated demo information only · local triage rules do not contact live AI services or dispatch a team.</span></div>
     </Dialog>
   );
 }
@@ -454,7 +459,7 @@ function IncidentPanel({ incidents, onSelectIncident }: { incidents: Incident[];
   const criticalCount = incidents.filter((incident) => incident.severity === "Critical").length;
   const columns: DataColumn<Incident>[] = [
     { key: "priority", title: "PRI", render: (row) => <SeverityBadge severity={row.severity} priority={row.priority} compact /> },
-    { key: "incident", title: "PRIORITY INCIDENTS", render: (row) => <div className="incident-cell"><strong>{row.type}</strong><span>#{row.id} <i /> {row.location} · {row.peopleAffected} people</span>{row.source === "Citizen SOS" && <small className="incident-cell__status">SOS RECEIVED · PENDING TRIAGE</small>}</div> },
+    { key: "incident", title: "PRIORITY INCIDENTS", render: (row) => <div className="incident-cell"><strong>{row.type}</strong><span>#{row.id} <i /> {row.location} · {row.peopleAffected} people</span>{row.source === "Citizen SOS" && <small className="incident-cell__status">{row.triageStatus === "Complete" ? `TRIAGED — ${row.severity.toUpperCase()} · ${row.priority}` : row.triageStatus === "Manual review required" ? "MANUAL REVIEW REQUIRED" : "SOS RECEIVED · PENDING TRIAGE"}</small>}</div> },
     { key: "age", title: "AGE", align: "right", className: "incident-age", render: (row) => <span>{row.reportedAt}</span> },
   ];
   return (

@@ -4,6 +4,7 @@ import { ToastProvider } from "./components/system/feedback";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { OperationsProvider } from "./features/command-center/OperationsContext";
 import CitizenSOSPage from "./features/citizen-sos/CitizenSOS";
+import AITriagePage from "./features/ai-triage/AITriagePage";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 
@@ -12,6 +13,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/citizen-sos" component={CitizenSOSPage} />
+      <Route path="/ai-triage" component={AITriagePage} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

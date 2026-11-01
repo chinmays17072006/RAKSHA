@@ -155,3 +155,70 @@ After completing Phase 1, stop and provide: (1) what was implemented; (2) what i
 - Browser checks passed: blank submission showed inline errors; the fictional demo values loaded; USE MY LOCATION reported Sector 04 without requesting GPS; all four registration steps displayed; submission created #1043 and the dismissible NEW SOS RECEIVED notification; the success screen and Back to Command Center worked; #1043 appeared in the list and map; both its map marker and priority row opened #1043 with the correct message and PENDING TRIAGE; existing REVIEW #1042 still opened #1042; Team Bravo and Shelter 01 popovers still worked.
 - Desktop, tablet, and mobile layouts were visually checked. TypeScript check passed; static production build passed; `/` and `/citizen-sos` returned HTTP 200; `/manus-routes.json` contained exactly those routes; favicon returned HTTP 200; browser console had no output.
 - Remaining limitations: report records live only in the shared in-memory browser session and reset on page reload; GPS, photo upload, voice capture, real dispatch, AI triage, and persistent storage are not connected. The static build retains the known non-blocking Vite warning for the platform's classic dynamic-config script.
+
+
+
+## Phase 3 — AI SOS Triage — Complete
+
+### 26. Preserve the existing project and strictly limit scope — Complete
+- Continue working on the existing RAKSHA project. Phase 1 — Command Center and Phase 2 — Citizen SOS are complete. Do NOT rebuild the application, redesign the existing UI, or rewrite working Phase 1 or Phase 2 components.
+- Reuse the existing centralized operations store and existing components.
+- Implement ONLY PHASE 3 — AI SOS TRIAGE. Do NOT implement Phase 4 routing, rescue dispatch, shelters, offline synchronization, Phase 4+, or any later phase.
+- This is a hackathon prototype with approximately 1,558 credits remaining. Do not build production-grade AI infrastructure, a new backend, external AI APIs, API keys, real emergency services, real GPS, unnecessary dependencies, or complex unrelated features. Prefer lightweight deterministic local rules; keep the implementation focused.
+
+### 27. AI Triage page, navigation, and compact layout — Complete
+- Activate the existing AI TRIAGE sidebar item.
+- Create a focused professional AI Triage screen, not a huge complex page. It needs only: incident selector; incident information; Analyze Incident button; AI processing state; AI triage result; operational explanation; triage timeline.
+- Preserve the RAKSHA dark command-center visual language and existing layout. Keep this an emergency intelligence system, not a chatbot.
+
+### 28. Shared incident store and incident selector — Complete
+- Use the SAME centralized incident store from Phases 1 and 2. Do NOT create duplicate incident data.
+- Main incident is #1043: Flash Flood; Sector 04; 4 people; 1 elderly person; source Citizen SOS; message: “Water has entered our house. Four people are trapped inside. My grandmother is with us and cannot walk.”
+- Before analysis #1043 has STATUS SOS RECEIVED; SEVERITY PENDING TRIAGE; PRIORITY PENDING.
+- Show a compact selector with #1043 — Flash Flood — Sector 04; #1042 — Flash Flood — Sector 04; #1041 — Water Ingress — Sector 07. Automatically select #1043 as the primary demo when that incident is present.
+- Keep the selected summary compact and show INCIDENT #1043; FLASH FLOOD; SECTOR 04; 4 PEOPLE; 1 ELDERLY PERSON; SOURCE CITIZEN SOS; STATUS SOS RECEIVED.
+
+### 29. Short Analyze Incident processing flow — Complete
+- Provide one prominent ANALYZE INCIDENT button.
+- Clicking it shows a short processing animation of approximately four steps, in this order: RECEIVING INCIDENT; ANALYZING EMERGENCY; ASSESSING RISK; ASSIGNING PRIORITY. Keep the animation short; do not create a long loading sequence.
+- Do not simulate model reasoning or expose hidden chain-of-thought.
+
+### 30. Local deterministic triage rules and operational explanation — Complete
+- Implement the lightweight triage engine locally with transparent deterministic rules. Do NOT connect to an external AI API; do NOT require API keys or a backend.
+- For the primary demo, if incident information indicates active flooding, people trapped, multiple people, an elderly/person requiring assistance, inability to walk, and immediate danger, produce SEVERITY CRITICAL; PRIORITY P0; RECOMMENDED ACTION IMMEDIATE RESCUE; MEDICAL SUPPORT RECOMMENDED; AI CONFIDENCE 94%.
+- Show only this concise operational explanation, not internal reasoning: AI ASSESSMENT — “Critical priority assigned because the report indicates active flooding, multiple people trapped, and an elderly person requiring assistance.”
+
+### 31. Visible AI result and update the same incident object — Complete
+- After successful analysis, show AI TRIAGE COMPLETE and a strong but compact result with SEVERITY CRITICAL; PRIORITY P0; PEOPLE AFFECTED 4; VULNERABLE PERSON ELDERLY — YES; RECOMMENDED ACTION IMMEDIATE RESCUE; MEDICAL SUPPORT RECOMMENDED; AI CONFIDENCE 94%.
+- Update the SAME #1043 object in the centralized store; do NOT create another incident. Change status from SOS RECEIVED to TRIAGED — CRITICAL; severity from PENDING TRIAGE to CRITICAL; priority from PENDING to P0. Add `recommendedAction: Immediate Rescue`, `medicalSupport: Recommended`, `aiConfidence: 94`, and `triagedAt` with the current simulated timestamp.
+- The Command Center, map markers, incident rows, and incident details must use that same updated incident record.
+
+### 32. Command Center reflection and triage notification — Complete
+- After analyzing #1043, return to the existing Command Center and show the same entry as #1043; Flash Flood; Sector 04; 4 people; CRITICAL; P0. Its map marker must reflect its new critical state.
+- Opening #1043 in the Command Center shows AI TRIAGE COMPLETE; SEVERITY CRITICAL; PRIORITY P0; RECOMMENDED ACTION IMMEDIATE RESCUE.
+- Use the existing notification system, not a separate architecture. After successful triage show AI TRIAGE COMPLETE; Incident #1043; CRITICAL / P0; “Immediate rescue recommended.”
+
+### 33. Triage timeline and insufficient-information handling — Complete
+- Add a compact timeline with simulated timestamps and these events: 10:42:01 — SOS RECEIVED; 10:42:03 — LOCATION VERIFIED; 10:42:04 — INCIDENT REGISTERED; 10:42:08 — AI TRIAGE STARTED; 10:42:10 — CRITICAL / P0 ASSIGNED; 10:42:11 — RESCUE RECOMMENDATION GENERATED.
+- If an incident does not contain enough information, show INSUFFICIENT INFORMATION and MANUAL REVIEW REQUIRED. Do not automatically assign CRITICAL to incomplete incidents.
+- The primary #1043 demo must successfully reach CRITICAL / P0.
+- For other selected incidents, timeline classification and recommendation events must match that incident's actual assessment; do not hardcode #1043's CRITICAL/P0 or rescue recommendation.
+- On manual review, add an INSUFFICIENT INFORMATION event to that same incident's timeline; do not assign severity or priority.
+
+### 34. Preserve #1042 and all Phase 1/2 behavior — Complete
+- Preserve the existing #1042 demo and its Phase 1 behavior. It continues to display CRITICAL; P0; Flash Flood; Sector 04; 4 people; 1 elderly person.
+- Do not break Citizen SOS or the Phase 1 Command Center. Existing Incident #1042 must remain available; the SOS form must still work; Phase 1 layout, incidents, map, team/shelter controls, navigation, and status panels remain functional.
+
+### 35. Phase 3 visual system, responsiveness, and credit control — Complete
+- Preserve the existing RAKSHA design exactly: dark charcoal, dark navy, white/off-white, muted blue, cyan for AI activity, amber for warnings, red for critical, green for completed/healthy.
+- Use subtle transitions only. Do not introduce excessive gradients, giant cards, excessive glassmorphism, unnecessary animations, chatbot-style UI, or decorative elements that do not improve usability.
+- The page must work on desktop, tablet, and mobile. Desktop is the main judge-presentation target. Do not introduce horizontal overflow.
+- Prioritize functionality and reliability over additional features.
+
+### 36. Phase 3 acceptance and handoff — Complete
+- Verify: AI Triage page opens; #1043 can be selected; Analyze Incident works; processing state appears; #1043 becomes CRITICAL and P0; recommended action becomes IMMEDIATE RESCUE; medical support becomes RECOMMENDED; confidence displays 94%; operational explanation displays; the SAME #1043 object is updated; Command Center reflects CRITICAL/P0; the map marker reflects the updated state; notification works; timeline updates; #1042 still works; Citizen SOS still works; Phase 1 still works; responsive layout works; TypeScript/build passes; no blocking console errors.
+- Final demonstration flow: SOS #1043 → AI ANALYSIS → CRITICAL → P0 → IMMEDIATE RESCUE → COMMAND CENTER UPDATED.
+- STOP AFTER PHASE 3. Do NOT start Phase 4, routing, rescue dispatch, offline mode, shelters, or a large visual redesign. At completion report only: (1) features implemented; (2) tests completed; (3) errors or warnings; (4) limitations; (5) commit/version identifier.
+- Browser checks passed: the sequential Citizen SOS demo created #1043; the four-step analysis produced CRITICAL/P0, 94% confidence, IMMEDIATE RESCUE, and the exact six-event timeline; the existing Command Center reflected the same #1043 record and its critical map marker; the triage notification appeared; #1042 remained Critical/P0/Awaiting Rescue; #1041 analyzed as High/P1 and displayed a matching non-rescue recommendation/timeline. The browser console had no output. The deterministic engine tests include incomplete-information manual review; the manual-review result now also updates the same record's timeline without changing severity or priority.
+- `pnpm check` passed; `pnpm test` passed (10 tests across 3 files); `pnpm build:static` passed. `/`, `/citizen-sos`, `/ai-triage`, `/raksha-mark.svg`, and `/manus-routes.json` returned HTTP 200; the route manifest matches the three implemented pages. Desktop, tablet, and mobile AI Triage layouts were visually checked; no horizontal overflow was observed.
+- Known limitations: incident state is in-memory and resets on a fresh page load. The Phase 3 selector defaults to #1043 when it exists; in a fresh session, submit the Citizen SOS demo first, and the empty state guides the operator to do so. The rule engine is deterministic local demo logic, not a live AI service; no real dispatch, GPS, backend persistence, or Phase 4 routing is connected. Vite retains the non-blocking warning for the platform's classic dynamic-config script.
