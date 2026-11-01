@@ -1,6 +1,15 @@
-export type Severity = "Critical" | "High" | "Moderate" | "Low";
-export type IncidentStatus = "New" | "Assessing" | "Monitoring" | "Contained";
-export type TeamStatus = "On scene" | "Mobilizing" | "Staged" | "Available";
+export type Severity = "Critical" | "High" | "Medium" | "Moderate" | "Low";
+export type IncidentPriority = "P0" | "P1" | "P2" | "P3";
+export type IncidentStatus = "Awaiting rescue" | "Under review" | "Monitoring" | "Contained";
+export type TeamStatus = "En route" | "On scene" | "Mobilizing" | "Staged" | "Available";
+export type RiskLevel = "Critical" | "High" | "Moderate" | "Safe";
+
+export interface IncidentTimelineEvent {
+  time: string;
+  title: string;
+  detail: string;
+  tone: "red" | "amber" | "blue" | "green";
+}
 
 export interface Incident {
   id: string;
@@ -8,11 +17,15 @@ export interface Incident {
   location: string;
   peopleAffected: number;
   vulnerablePeople: number;
+  vulnerableDescription?: string;
   severity: Severity;
+  priority: IncidentPriority;
   status: IncidentStatus;
   reportedAt: string;
   message: string;
+  source: "SOS" | "Sensor" | "Field report";
   coordinates: { x: number; y: number };
+  timeline: IncidentTimelineEvent[];
 }
 
 export interface RescueTeam {
@@ -23,6 +36,10 @@ export interface RescueTeam {
   location: string;
   vehicle: string;
   availability: number;
+  role: string;
+  coordinates: { x: number; y: number };
+  assignedIncidentId?: string;
+  etaMinutes?: number;
 }
 
 export interface Shelter {
@@ -32,6 +49,7 @@ export interface Shelter {
   capacity: number;
   occupancy: number;
   status: "Open" | "Limited" | "Full";
+  coordinates: { x: number; y: number };
 }
 
 export interface Resource {
@@ -47,18 +65,21 @@ export interface Road {
   id: string;
   name: string;
   sector: string;
-  status: "Open" | "Restricted" | "Closed";
+  status: "Open" | "Restricted" | "Closed" | "Blocked";
   note?: string;
 }
 
 export interface DisasterZone {
   id: string;
   name: string;
+  sector: string;
   type: "Flood" | "Landslide" | "Storm";
-  severity: Severity;
+  riskLevel: RiskLevel;
   waterLevel?: number;
   rainfallMm?: number;
+  peopleAffected: number;
   coordinates: { x: number; y: number };
+  radius: number;
 }
 
 export interface SOSRequest {
@@ -67,7 +88,25 @@ export interface SOSRequest {
   receivedAt: string;
   people: number;
   vulnerablePeople: number;
-  priority: Severity;
+  priority: IncidentPriority;
   summary: string;
   location: string;
+}
+
+export interface SystemStatus {
+  network: "Connected" | "Disconnected";
+  dataSync: "Live" | "Paused";
+  system: "Operational" | "Degraded";
+  lastSync: string;
+  activeSOSCount: number;
+}
+
+export interface OperationsState {
+  incidents: Incident[];
+  rescueTeams: RescueTeam[];
+  shelters: Shelter[];
+  riskZones: DisasterZone[];
+  roads: Road[];
+  resources: Resource[];
+  systemStatus: SystemStatus;
 }

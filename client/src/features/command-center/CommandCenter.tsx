@@ -29,8 +29,8 @@ import {
   X,
 } from "lucide-react";
 import { NavigationItem } from "@/components/system/NavigationItem";
-import { incidents, rescueTeams, shelters, systemSignals } from "@/data/demo";
-import type { Incident } from "@/types/disaster";
+import { useOperations } from "./OperationsContext";
+import type { DisasterZone, Incident, RescueTeam, Shelter, SystemStatus } from "@/types/disaster";
 import { Dialog, useToast } from "@/components/system/feedback";
 import {
   Button,
@@ -70,10 +70,14 @@ function NavigationRail({
   open,
   onClose,
   onPlaceholder,
+  rainfall,
+  systemStatus,
 }: {
   open: boolean;
   onClose: () => void;
   onPlaceholder: (label: string) => void;
+  rainfall: number;
+  systemStatus: SystemStatus;
 }) {
   return (
     <>
@@ -110,17 +114,17 @@ function NavigationRail({
         <div className="sidebar__spacer" />
         <div className="sidebar-weather">
           <div className="sidebar-weather__top"><CloudRain size={15} /><span>MONSOON WATCH</span><span className="sidebar-weather__pulse" /></div>
-          <strong>86 <small>mm</small></strong>
+          <strong>{rainfall} <small>mm</small></strong>
           <span>rainfall · last 3 hours</span>
           <div className="sidebar-weather__bar"><span /></div>
           <div className="sidebar-weather__foot"><span>SECTOR 04</span><span>HIGH ALERT</span></div>
         </div>
         <div className="sidebar-status">
           <span className="system-dot" />
-          <div><strong>SYSTEM OPERATIONAL</strong><span>All core systems online</span></div>
+          <div><strong>SYSTEM {systemStatus.system.toUpperCase()}</strong><span>Network {systemStatus.network.toLowerCase()} · sync {systemStatus.dataSync.toLowerCase()}</span></div>
           <CheckCircle2 size={15} aria-hidden="true" />
         </div>
-        <div className="sidebar__version">RAKSHA <span>•</span> FOUNDATION 0.1</div>
+        <div className="sidebar__version">RAKSHA <span>•</span> COMMAND CENTER · PHASE 1</div>
       </aside>
     </>
   );
@@ -129,9 +133,11 @@ function NavigationRail({
 function TopBar({
   onMenu,
   onNotifications,
+  systemStatus,
 }: {
   onMenu: () => void;
   onNotifications: () => void;
+  systemStatus: SystemStatus;
 }) {
   const [now, setNow] = useState(() => new Date());
   const [profileOpen, setProfileOpen] = useState(false);
@@ -153,8 +159,8 @@ function TopBar({
         <div className="topbar__page"><span>OPERATIONS / OVERVIEW</span><strong>COMMAND CENTER</strong></div>
       </div>
       <div className="topbar__right">
-        <StatusBadge tone="success" dot className="live-badge">LIVE MONITORING</StatusBadge>
-        <span className="topbar__operational"><span className="system-dot" /> OPERATIONAL</span>
+        <StatusBadge tone={systemStatus.dataSync === "Live" ? "success" : "warning"} dot className="live-badge">{systemStatus.dataSync === "Live" ? "LIVE MONITORING" : "MONITORING PAUSED"}</StatusBadge>
+        <span className="topbar__operational"><span className="system-dot" /> {systemStatus.system.toUpperCase()}</span>
         <div className="topbar__time"><strong>{time}</strong><span>{date} <span className="timezone">LOCAL</span></span></div>
         <button className="icon-button topbar__bell" onClick={onNotifications} aria-label="View system notifications"><Bell size={17} /><i /></button>
         <div className="profile-wrap">
@@ -172,19 +178,34 @@ function TopBar({
 
 function MapLayer({
   floodVisible,
+  waterLevel,
   teamsVisible,
+  sheltersVisible,
+  riskZones,
+  incidents,
+  rescueTeams,
+  shelters,
   onSelectIncident,
+  onSelectTeam,
+  onSelectShelter,
   focusPulse,
 }: {
   floodVisible: boolean;
+  waterLevel: number;
   teamsVisible: boolean;
-  onSelectIncident: () => void;
+  sheltersVisible: boolean;
+  riskZones: DisasterZone[];
+  incidents: Incident[];
+  rescueTeams: RescueTeam[];
+  shelters: Shelter[];
+  onSelectIncident: (incidentId: string) => void;
+  onSelectTeam: (team: RescueTeam) => void;
+  onSelectShelter: (shelter: Shelter) => void;
   focusPulse: boolean;
 }) {
-  const openIncident = () => onSelectIncident();
   return (
     <div className={`map-canvas ${focusPulse ? "map-canvas--focused" : ""}`}>
-      <svg className="map-svg" viewBox="0 0 920 410" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Schematic disaster map showing a simulated flood area in Sector 04, one priority incident and response-team positions">
+      <svg className="map-svg" viewBox="0 0 920 410" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Schematic disaster map showing simulated critical, high, moderate, and safe zones across seven sectors">
         <defs>
           <pattern id="map-grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#294050" strokeWidth=".6" opacity=".48" /></pattern>
           <pattern id="water-lines" width="24" height="14" patternUnits="userSpaceOnUse"><path d="M-2 8c4-4 8-4 12 0s8 4 12 0 8-4 12 0" fill="none" stroke="#36a7c8" strokeWidth=".8" opacity=".37" /></pattern>
@@ -217,8 +238,17 @@ function MapLayer({
           <path d="m90 230 202 30 88-56 153 66-31 116-232 24-187-36Z" />
           <path d="m533 270 157-36 185 43-9 103-258 16-133-22Z" />
         </g>
+        <g className="map-risk-zones">
+          {riskZones.map((zone) => (
+            <g key={zone.id} className={`map-risk-zone map-risk-zone--${zone.riskLevel.toLowerCase()}`}>
+              <ellipse cx={zone.coordinates.x * 9.2} cy={zone.coordinates.y * 4.1} rx={zone.radius * 4.1} ry={zone.radius * 2.25}>
+                <title>{`${zone.sector} · ${zone.riskLevel} · ${zone.name}`}</title>
+              </ellipse>
+            </g>
+          ))}
+        </g>
         <g className="map-labels">
-          <text x="126" y="142">SECTOR 02</text><text x="470" y="153">SECTOR 04</text><text x="710" y="183">SECTOR 06</text>
+          <text x="78" y="112">SECTOR 01</text><text x="126" y="142">SECTOR 02</text><text x="300" y="103">SECTOR 03</text><text x="470" y="153">SECTOR 04</text><text x="710" y="183">SECTOR 05</text>
           <text x="198" y="322">SECTOR 07</text><text x="634" y="344">SECTOR 09</text>
           <text className="map-labels__river" x="334" y="238" transform="rotate(8 334 238)">EASTERN CHANNEL</text>
           <text className="map-labels__district" x="48" y="38">EASTERN DISTRICT / SIMULATED LAYER</text>
@@ -227,36 +257,72 @@ function MapLayer({
           <path d="M410 120c40-32 104-27 140-4 35 23 67 36 61 80-4 31-34 50-70 58-38 8-69 3-101-16-41-24-73-34-67-70 4-21 14-35 37-48Z" />
           <path d="M410 120c40-32 104-27 140-4 35 23 67 36 61 80-4 31-34 50-70 58-38 8-69 3-101-16-41-24-73-34-67-70 4-21 14-35 37-48Z" fill="url(#water-lines)" />
           <text x="498" y="202">HIGH-WATER ZONE</text>
-          <text x="509" y="219">2.4 M / RISING</text>
+          <text x="509" y="219">{waterLevel.toFixed(1)} M / RISING</text>
         </g>}
-        {teamsVisible && <g className="map-team-markers">
-          <g transform="translate(310 167)"><circle r="13" /><path d="M0-5v10M-5 0h10" /></g>
-          <g transform="translate(257 278)"><circle r="13" /><path d="M0-5v10M-5 0h10" /></g>
-          <g transform="translate(652 277)"><circle r="13" /><path d="M0-5v10M-5 0h10" /></g>
-        </g>}
-        <g className="map-incident-marker" role="button" tabIndex={0} aria-label="Open priority incident 1042 in Sector 04" onClick={openIncident} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openIncident(); } }}>
-          <circle className="map-incident-marker__ring" cx="535" cy="167" r="26" />
-          <circle className="map-incident-marker__halo" cx="535" cy="167" r="17" />
-          <circle className="map-incident-marker__dot" cx="535" cy="167" r="7" filter="url(#marker-glow)" />
-          <rect className="map-incident-marker__label-bg" x="553" y="146" width="102" height="37" rx="4" />
-          <text className="map-incident-marker__label" x="564" y="161">#1042 · P1</text>
-          <text className="map-incident-marker__sub" x="564" y="174">FLASH FLOOD</text>
-        </g>
       </svg>
+      <div className="map-marker-layer" role="group" aria-label="Simulated incident, response-team, and shelter markers">
+        {incidents.filter((incident) => incident.source === "SOS").map((incident) => (
+          <button
+            type="button"
+            key={incident.id}
+            className={`map-point map-point--sos ${incident.id === "1042" ? "map-point--primary" : ""}`}
+            style={{ left: `${incident.coordinates.x}%`, top: `${incident.coordinates.y}%` }}
+            onClick={() => onSelectIncident(incident.id)}
+            aria-label={`Open incident #${incident.id}, ${incident.priority} ${incident.severity}, ${incident.location}`}
+            title={`#${incident.id} · ${incident.priority} · ${incident.severity}`}
+          >
+            <span className="map-point__icon"><LifeBuoy size={incident.id === "1042" ? 15 : 12} /></span>
+            {incident.id === "1042" ? <span className="map-point__label"><strong>#1042 <b>P0</b></strong><small>CRITICAL · SECTOR 04</small></span> : <span className="map-point__code">{incident.priority}</span>}
+          </button>
+        ))}
+        {teamsVisible && rescueTeams.slice(0, 3).map((team) => (
+          <button
+            type="button"
+            key={team.id}
+            className="map-point map-point--team"
+            style={{ left: `${team.coordinates.x}%`, top: `${team.coordinates.y}%` }}
+            onClick={() => onSelectTeam(team)}
+            aria-label={`Show information for ${team.name}`}
+            title={team.name}
+          ><span className="map-point__icon"><Truck size={13} /></span><span className="map-point__asset-label">{team.name.replace("TEAM ", "")}</span></button>
+        ))}
+        {sheltersVisible && shelters.slice(0, 3).map((shelter) => (
+          <button
+            type="button"
+            key={shelter.id}
+            className="map-point map-point--shelter"
+            style={{ left: `${shelter.coordinates.x}%`, top: `${shelter.coordinates.y}%` }}
+            onClick={() => onSelectShelter(shelter)}
+            aria-label={`Show information for ${shelter.name}`}
+            title={shelter.name}
+          ><span className="map-point__icon"><Building2 size={12} /></span><span className="map-point__asset-label">{shelter.name.replace("SHELTER ", "S")}</span></button>
+        ))}
+      </div>
       <div className="map-compass" aria-hidden="true"><span>N</span><div><i /><i /><i /><i /></div></div>
       <div className="map-note"><CircleDot size={11} /> SIMULATED MAP DATA <span>·</span> NOT TO SCALE</div>
     </div>
   );
 }
 
-function MapPanel({ onSelectIncident }: { onSelectIncident: () => void }) {
-  const [layers, setLayers] = useState({ flood: true, teams: true });
+function MapPanel({ incidents, rescueTeams, shelters, riskZones, waterLevel, onSelectIncident }: {
+  incidents: Incident[];
+  rescueTeams: RescueTeam[];
+  shelters: Shelter[];
+  riskZones: DisasterZone[];
+  waterLevel: number;
+  onSelectIncident: (incidentId: string) => void;
+}) {
+  const [layers, setLayers] = useState({ flood: true, teams: true, shelters: true });
   const [focused, setFocused] = useState(false);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const [selectedShelterId, setSelectedShelterId] = useState<string | null>(null);
+  const selectedTeam = rescueTeams.find((team) => team.id === selectedTeamId) ?? null;
+  const selectedShelter = shelters.find((shelter) => shelter.id === selectedShelterId) ?? null;
   const showToast = useToast();
-  const toggleLayer = (key: "flood" | "teams") => setLayers((current) => ({ ...current, [key]: !current[key] }));
+  const toggleLayer = (key: keyof typeof layers) => setLayers((current) => ({ ...current, [key]: !current[key] }));
   const focusMap = () => {
     setFocused(true);
-    showToast({ title: "Sector 04 centered", detail: "Schematic view · operational actions are not connected", tone: "info" });
+    showToast({ title: "Sector 04 centered", detail: "Simulated map view · no live routing is connected.", tone: "info" });
     window.setTimeout(() => setFocused(false), 850);
   };
 
@@ -264,18 +330,51 @@ function MapPanel({ onSelectIncident }: { onSelectIncident: () => void }) {
     <Card className="map-panel">
       <div className="map-panel__header">
         <SectionHeader eyebrow="GEOSPATIAL AWARENESS" title="Live disaster map" />
-        <div className="map-panel__header-meta"><StatusBadge tone="info" dot>DEMO LAYER</StatusBadge><span>UPDATED 00:18 AGO</span></div>
+        <div className="map-panel__header-meta"><StatusBadge tone="info" dot>DEMO LAYER</StatusBadge><span>UPDATED JUST NOW</span></div>
       </div>
       <div className="map-panel__visual-wrap">
-        <MapLayer floodVisible={layers.flood} teamsVisible={layers.teams} onSelectIncident={onSelectIncident} focusPulse={focused} />
+        <MapLayer
+          floodVisible={layers.flood}
+          waterLevel={waterLevel}
+          teamsVisible={layers.teams}
+          sheltersVisible={layers.shelters}
+          riskZones={riskZones}
+          incidents={incidents}
+          rescueTeams={rescueTeams}
+          shelters={shelters}
+          onSelectIncident={(id) => { setSelectedTeamId(null); setSelectedShelterId(null); onSelectIncident(id); }}
+          onSelectTeam={(team) => { setSelectedShelterId(null); setSelectedTeamId(team.id); }}
+          onSelectShelter={(shelter) => { setSelectedTeamId(null); setSelectedShelterId(shelter.id); }}
+          focusPulse={focused}
+        />
+        {(selectedTeam || selectedShelter) && <div className="map-asset-popup" role="status">
+          <button className="icon-button map-asset-popup__close" onClick={() => { setSelectedTeamId(null); setSelectedShelterId(null); }} aria-label="Close map information"><X size={14} /></button>
+          {selectedTeam && <>
+            <span className="section-eyebrow">RESCUE UNIT · SIMULATED</span>
+            <strong>{selectedTeam.name}</strong>
+            <span>{selectedTeam.role} · {selectedTeam.status.toUpperCase()}</span>
+            <small>{selectedTeam.assignedIncidentId ? `Incident #${selectedTeam.assignedIncidentId} · ETA ${selectedTeam.etaMinutes} min` : `${selectedTeam.location} · Ready for deployment`}</small>
+          </>}
+          {selectedShelter && <>
+            <span className="section-eyebrow">SHELTER · SIMULATED</span>
+            <strong>{selectedShelter.name}</strong>
+            <span>{selectedShelter.location}</span>
+            <small>{selectedShelter.capacity - selectedShelter.occupancy} places available · {selectedShelter.occupancy} occupants</small>
+            <StatusBadge tone={selectedShelter.status === "Full" ? "warning" : "success"} dot>{selectedShelter.status.toUpperCase()}</StatusBadge>
+          </>}
+        </div>}
         <div className="map-layers" aria-label="Map layers">
           <button className={layers.flood ? "map-layer map-layer--active" : "map-layer"} aria-pressed={layers.flood} onClick={() => toggleLayer("flood")}><span className="map-layer__swatch map-layer__swatch--flood" /> Flood extent</button>
           <button className={layers.teams ? "map-layer map-layer--active" : "map-layer"} aria-pressed={layers.teams} onClick={() => toggleLayer("teams")}><span className="map-layer__swatch map-layer__swatch--team" /> Field units</button>
+          <button className={layers.shelters ? "map-layer map-layer--active" : "map-layer"} aria-pressed={layers.shelters} onClick={() => toggleLayer("shelters")}><span className="map-layer__swatch map-layer__swatch--shelter" /> Shelters</button>
         </div>
         <button className="map-focus" onClick={focusMap} aria-label="Center the map on Sector 04"><Crosshair size={15} /></button>
       </div>
       <div className="map-panel__footer">
-        <div className="map-legend"><span><i className="legend-dot legend-dot--red" /> Priority incident</span><span><i className="legend-dot legend-dot--blue" /> Response unit</span><span><i className="legend-dot legend-dot--water" /> Flood extent</span></div>
+        <div className="map-legend" aria-label="Map legend">
+          <span><i className="legend-dot legend-dot--critical" /> Critical</span><span><i className="legend-dot legend-dot--high" /> High Risk</span><span><i className="legend-dot legend-dot--moderate" /> Moderate</span><span><i className="legend-dot legend-dot--safe" /> Safe</span>
+          <span><LifeBuoy size={10} /> SOS</span><span><Truck size={10} /> Rescue Team</span><span><Building2 size={10} /> Shelter</span>
+        </div>
         <span className="map-scale">SECTOR 04 <b /> 1.4 KM</span>
       </div>
     </Card>
@@ -283,29 +382,51 @@ function MapPanel({ onSelectIncident }: { onSelectIncident: () => void }) {
 }
 
 function IncidentDetail({ incident, onClose }: { incident: Incident; onClose: () => void }) {
+  const isPrimary = incident.id === "1042";
+  const statusTone = incident.status === "Awaiting rescue" ? "critical" : incident.status === "Contained" ? "success" : "info";
   return (
-    <Dialog title={`Incident #${incident.id}`} eyebrow="SIMULATED INCIDENT RECORD · VIEW ONLY" onClose={onClose} footer={<Button variant="secondary" onClick={onClose}>Close details</Button>}>
+    <Dialog title={`INCIDENT #${incident.id}`} eyebrow="SIMULATED INCIDENT RECORD · VIEW ONLY" onClose={onClose} footer={<Button variant="secondary" onClick={onClose}>Close details</Button>}>
       <div className="incident-detail__summary">
-        <SeverityBadge severity={incident.severity} />
+        <SeverityBadge severity={incident.severity} priority={incident.priority} />
         <span className="incident-detail__type">{incident.type}</span>
-        <StatusBadge tone={incident.status === "New" ? "warning" : "info"}>{incident.status}</StatusBadge>
+        <StatusBadge tone={statusTone}>{incident.status.toUpperCase()}</StatusBadge>
       </div>
-      <div className="incident-detail__location"><MapPin size={16} /><span><strong>{incident.location}</strong><small>Eastern district · fictional demo coordinates</small></span></div>
-      <blockquote className="incident-detail__message">“{incident.message}”</blockquote>
+      <div className="incident-detail__location"><MapPin size={16} /><span><strong>{incident.location}</strong><small>Fictional demo location · received {incident.reportedAt}</small></span></div>
       <div className="incident-detail__facts">
-        <div><span>PEOPLE REPORTED</span><strong>{incident.peopleAffected}</strong></div>
-        <div><span>VULNERABLE PERSONS</span><strong>{incident.vulnerablePeople}</strong></div>
-        <div><span>RECEIVED</span><strong>{incident.reportedAt}</strong></div>
+        <div><span>LOCATION</span><strong>{incident.location}</strong></div>
+        <div><span>PEOPLE AFFECTED</span><strong>{incident.peopleAffected}</strong></div>
+        <div><span>VULNERABLE PERSON</span><strong>{incident.vulnerableDescription ?? (incident.vulnerablePeople ? `${incident.vulnerablePeople} person(s)` : "None reported")}</strong></div>
+        <div><span>PRIORITY</span><strong>{incident.priority}</strong></div>
       </div>
-      <div className="incident-detail__notice"><Shield size={15} /><span>This is simulated foundation data. No dispatch, triage, or citizen contact actions are connected in Phase 0.</span></div>
+      <blockquote className="incident-detail__message">“{incident.message}”</blockquote>
+      {isPrimary && <>
+        <section className="incident-detail__recommendation" aria-label="Demonstration recommendation">
+          <div><span>RECOMMENDED ACTION</span><strong>Immediate rescue required.</strong><small>For now, this is a demo recommendation.</small></div>
+          <div><span>MEDICAL SUPPORT</span><strong>Recommended</strong></div>
+        </section>
+        <div className="incident-detail__ai"><span><span className="section-eyebrow">AI TRIAGE</span><small>This will be connected later.</small></span><StatusBadge tone="warning">PENDING — PHASE 3</StatusBadge></div>
+      </>}
+      {incident.timeline.length > 0 && <section className="incident-detail__timeline">
+        <span className="section-eyebrow">INCIDENT TIMELINE</span>
+        <div className="incident-detail__timeline-list">
+          {incident.timeline.map((event, index) => <TimelineItem key={`${event.time}-${event.title}`} icon={event.tone === "red" ? AlertTriangle : CircleDot} title={event.title} detail={event.detail} time={event.time} tone={event.tone} last={index === incident.timeline.length - 1} />)}
+        </div>
+      </section>}
+      <div className="incident-detail__notice"><Shield size={15} /><span>Simulated demo information only · no dispatch or AI triage actions are connected.</span></div>
     </Dialog>
   );
 }
 
-function IncidentPanel({ onSelectIncident }: { onSelectIncident: (incident: Incident) => void }) {
-  const rows = useMemo(() => incidents.filter((incident) => incident.severity === "Critical" || incident.severity === "High"), []);
+function IncidentPanel({ incidents, onSelectIncident }: { incidents: Incident[]; onSelectIncident: (incidentId: string) => void }) {
+  const rows = useMemo(() => {
+    const pinned = ["1042", "1041", "1038"].map((id) => incidents.find((incident) => incident.id === id)).filter((incident): incident is Incident => incident !== undefined);
+    const pinnedIds = new Set(pinned.map((incident) => incident.id));
+    const additional = incidents.filter((incident) => !pinnedIds.has(incident.id)).sort((a, b) => Number(a.priority.slice(1)) - Number(b.priority.slice(1))).slice(0, 3);
+    return [...pinned, ...additional];
+  }, [incidents]);
+  const criticalCount = incidents.filter((incident) => incident.severity === "Critical").length;
   const columns: DataColumn<Incident>[] = [
-    { key: "priority", title: "PRI", render: (row) => <SeverityBadge severity={row.severity} compact /> },
+    { key: "priority", title: "PRI", render: (row) => <SeverityBadge severity={row.severity} priority={row.priority} compact /> },
     { key: "incident", title: "PRIORITY INCIDENTS", render: (row) => <div className="incident-cell"><strong>{row.type}</strong><span>#{row.id} <i /> {row.location} · {row.peopleAffected} people</span></div> },
     { key: "age", title: "AGE", align: "right", className: "incident-age", render: (row) => <span>{row.reportedAt}</span> },
   ];
@@ -313,27 +434,32 @@ function IncidentPanel({ onSelectIncident }: { onSelectIncident: (incident: Inci
     <Card className="incident-panel">
       <div className="incident-panel__header">
         <SectionHeader eyebrow="NEEDS ATTENTION" title="Priority incidents" />
-        <StatusBadge tone="critical">{rows.length.toString().padStart(2, "0")} HIGH PRIORITY</StatusBadge>
+        <StatusBadge tone="critical">{criticalCount.toString().padStart(2, "0")} CRITICAL</StatusBadge>
       </div>
-      <DataTable rows={rows} columns={columns} label="Priority incidents" onRowClick={onSelectIncident} />
-      <div className="incident-panel__footer"><span>Showing simulated reports</span><span className="incident-panel__view-label">OPEN A ROW FOR DETAILS <ArrowUpRight size={12} /></span></div>
+      <DataTable rows={rows} columns={columns} label="Priority incidents" onRowClick={(incident) => onSelectIncident(incident.id)} />
+      <div className="incident-panel__footer"><span>Showing simulated reports</span><span className="incident-panel__view-label">OPEN A ROW TO REVIEW <ArrowUpRight size={12} /></span></div>
     </Card>
   );
 }
 
-function ReadinessPanel() {
+function ReadinessPanel({ rescueTeams }: { rescueTeams: RescueTeam[] }) {
+  const featured = ["team-bravo", "team-alpha", "team-charlie"]
+    .map((id) => rescueTeams.find((team) => team.id === id))
+    .filter((team): team is RescueTeam => team !== undefined);
+  const availableCount = rescueTeams.filter((team) => team.status === "Available").length;
   return (
     <Card className="readiness-panel">
-      <div className="support-panel__header"><SectionHeader eyebrow="FIELD READINESS" title="Response units" /><StatusBadge tone="info" dot>SIMULATED</StatusBadge></div>
-      <div className="readiness-panel__summary"><strong>04</strong><span>teams reporting</span><span className="readiness-panel__divider" /><strong>16</strong><span>responders</span><span className="readiness-panel__summary-note"><ArrowUpRight size={12} /> 3 on call</span></div>
+      <div className="support-panel__header"><SectionHeader eyebrow="RESCUE OPERATIONS SUMMARY" title="Field response" /><StatusBadge tone="info" dot>DEMO SUMMARY</StatusBadge></div>
+      <div className="readiness-panel__summary"><strong>{availableCount.toString().padStart(2, "0")}</strong><span>teams available</span><span className="readiness-panel__divider" /><strong>{rescueTeams.length.toString().padStart(2, "0")}</strong><span>units reporting</span></div>
       <div className="team-list">
-        {rescueTeams.slice(0, 3).map((team) => {
-          const tone = team.status === "On scene" ? "critical" : team.status === "Mobilizing" ? "warning" : "success";
+        {featured.map((team) => {
+          const tone = team.status === "On scene" ? "critical" : team.status === "En route" || team.status === "Mobilizing" ? "warning" : "success";
+          const subline = team.assignedIncidentId ? `Incident #${team.assignedIncidentId} · ETA ${team.etaMinutes} min` : team.role === "Medical support" ? "Medical support · Available" : "Ready for deployment";
           return (
             <div className="team-row" key={team.id}>
               <span className={`team-row__icon team-row__icon--${tone}`}><Truck size={15} /></span>
-              <div className="team-row__details"><strong>{team.name}</strong><span>{team.location} <i /> {team.members} responders</span></div>
-              <div className="team-row__status"><StatusBadge tone={tone}>{team.status}</StatusBadge><ProgressIndicator value={team.availability} showValue={false} tone={team.status === "Mobilizing" ? "amber" : team.status === "On scene" ? "red" : "green"} /></div>
+              <div className="team-row__details"><strong>{team.name}</strong><span>{subline}</span></div>
+              <div className="team-row__status"><StatusBadge tone={tone}>{team.status.toUpperCase()}</StatusBadge><ProgressIndicator value={team.availability} showValue={false} tone={team.status === "En route" || team.status === "Mobilizing" ? "amber" : team.status === "On scene" ? "red" : "green"} /></div>
             </div>
           );
         })}
@@ -343,113 +469,142 @@ function ReadinessPanel() {
   );
 }
 
-function NetworkPanel() {
+function NetworkPanel({ systemStatus }: { systemStatus: SystemStatus }) {
+  const signals = [
+    { id: "network", name: "NETWORK", source: "District mesh", status: systemStatus.network, icon: Signal },
+    { id: "sync", name: "DATA SYNC", source: "Simulated heartbeat", status: systemStatus.dataSync, icon: Activity },
+    { id: "system", name: "SYSTEM", source: "RAKSHA core", status: systemStatus.system, icon: ShieldCheck },
+  ];
   return (
     <Card className="network-panel">
-      <div className="support-panel__header"><SectionHeader eyebrow="SYSTEM / NETWORK" title="Signal health" /><span className="network-health"><span className="system-dot" /> NOMINAL</span></div>
+      <div className="support-panel__header"><SectionHeader eyebrow="SYSTEM / NETWORK" title="System health" /><span className="network-health"><span className="system-dot" /> {systemStatus.system.toUpperCase()}</span></div>
       <div className="network-list">
-        {systemSignals.map((signal) => {
-          const tone = signal.status === "Standby" ? "info" : "success";
-          const Icon = signal.id === "rainfall" ? Droplets : signal.id === "radio" ? RadioTower : Signal;
+        {signals.map((signal) => {
+          const tone = ["Connected", "Live", "Operational"].includes(signal.status) ? "success" : "critical";
+          const Icon = signal.icon;
           return (
             <div className="network-row" key={signal.id}>
               <span className="network-row__icon"><Icon size={15} /></span>
               <span className="network-row__copy"><strong>{signal.name}</strong><small>{signal.source}</small></span>
-              <span className="network-row__state"><StatusBadge tone={tone} dot>{signal.status}</StatusBadge><small>{signal.latency}</small></span>
+              <span className="network-row__state"><StatusBadge tone={tone} dot>{signal.status.toUpperCase()}</StatusBadge></span>
             </div>
           );
         })}
       </div>
-      <div className="network-panel__foot"><span>LAST SYNCHRONIZATION</span><strong>Just now</strong><span className="network-panel__demo">LOCAL DEMO STATE</span></div>
+      <div className="network-panel__foot"><span>LAST SYNC</span><strong>{systemStatus.lastSync}</strong><span className="network-panel__demo">SIMULATED LOCAL STATE</span></div>
     </Card>
   );
 }
 
-function SituationPanel() {
+function SituationPanel({ incident, rainfall, systemStatus }: { incident: Incident; rainfall: number; systemStatus: SystemStatus }) {
   return (
     <Card className="situation-panel">
       <div className="support-panel__header"><SectionHeader eyebrow="SITUATION LOG" title="Recent signals" /><span className="activity-count">03 EVENTS</span></div>
       <div className="situation-timeline">
-        <TimelineItem icon={AlertTriangle} title="Priority report received" detail="Flash flood · Sector 04" time="03m" tone="red" />
-        <TimelineItem icon={CloudRain} title="Rainfall threshold elevated" detail="86 mm recorded / 3 hours" time="12m" tone="amber" />
-        <TimelineItem icon={Radio} title="District radio check-in" detail="All channels responding" time="18m" tone="green" last />
+        <TimelineItem icon={AlertTriangle} title="Priority report received" detail={`${incident.type} · ${incident.location}`} time={incident.reportedAt} tone="red" />
+        <TimelineItem icon={CloudRain} title="Rainfall threshold elevated" detail={`${rainfall} mm recorded / 3 hours`} time="12m" tone="amber" />
+        <TimelineItem icon={Radio} title="District radio check-in" detail={`Network ${systemStatus.network.toLowerCase()}`} time="18m" tone="green" last />
       </div>
       <div className="situation-panel__foot"><span>Activity is part of the simulated feed</span><CircleDot size={12} /></div>
     </Card>
   );
 }
 
-function EmergencyBanner({ onReview }: { onReview: () => void }) {
+function EmergencyBanner({ incident, waterLevel, onReview }: { incident: Incident; waterLevel: number; onReview: () => void }) {
   return (
     <section className="emergency-banner" aria-labelledby="emergency-title">
       <span className="emergency-banner__rail" />
       <div className="emergency-banner__icon"><AlertTriangle size={20} strokeWidth={1.8} /></div>
       <div className="emergency-banner__copy">
-        <div className="emergency-banner__eyebrow"><span>ACTIVE EMERGENCY</span><i /> FLASH-FLOOD WATCH <i /> SECTOR 04</div>
+        <div className="emergency-banner__eyebrow"><span>ACTIVE EMERGENCY</span><i /> FLASH FLOOD WATCH <i /> SECTOR 04</div>
         <h1 id="emergency-title">Escalated water levels in the eastern floodplain</h1>
-        <p>One priority report indicates four people isolated, including an elderly resident. Demo scenario · not a live dispatch.</p>
+        <p>One priority report indicates {incident.peopleAffected} people isolated, including {incident.vulnerableDescription ?? "a vulnerable person"}. Demo scenario · not a live dispatch.</p>
       </div>
-      <div className="emergency-banner__side"><StatusBadge tone="critical" dot>P1 · CRITICAL</StatusBadge><Button variant="danger" size="sm" icon={ChevronRight} onClick={onReview}>Review #1042</Button></div>
-      <div className="emergency-banner__stamp"><span>WATER LEVEL</span><strong>2.4<small>m</small></strong><em><ArrowUpRight size={12} /> RISING</em></div>
+      <div className="emergency-banner__side"><StatusBadge tone="critical" dot>P0 — CRITICAL</StatusBadge><Button variant="danger" size="sm" icon={ChevronRight} onClick={onReview}>REVIEW #1042</Button></div>
+      <div className="emergency-banner__stamp"><span>WATER LEVEL</span><strong>{waterLevel.toFixed(1)}<small>m</small></strong><em><ArrowUpRight size={12} /> RISING</em></div>
     </section>
   );
 }
 
 export default function CommandCenter() {
-  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
+  const { state } = useOperations();
+  const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [refreshedAt, setRefreshedAt] = useState("18 sec ago");
+  const [refreshedAt, setRefreshedAt] = useState("just now");
   const showToast = useToast();
+
+  const primaryIncident = state.incidents.find((incident) => incident.id === "1042")!;
+  const selectedIncident = state.incidents.find((incident) => incident.id === selectedIncidentId) ?? null;
+  const primaryRiskZone = state.riskZones.find((zone) => zone.id === "zone-04-east");
+  const criticalCount = state.incidents.filter((incident) => incident.severity === "Critical").length;
+  const availableTeamCount = state.rescueTeams.filter((team) => team.status === "Available").length;
+  const totalShelterCapacity = state.shelters.reduce((total, shelter) => total + shelter.capacity, 0);
+  const availableShelterCapacity = state.shelters.reduce((total, shelter) => total + shelter.capacity - shelter.occupancy, 0);
+  const shelterCapacityPercent = totalShelterCapacity ? Math.round((availableShelterCapacity / totalShelterCapacity) * 100) : 0;
+  const peopleInPriority = state.riskZones.filter((zone) => zone.riskLevel === "Critical" || zone.riskLevel === "High").reduce((total, zone) => total + zone.peopleAffected, 0);
+  const criticalZoneCount = state.riskZones.filter((zone) => zone.riskLevel === "Critical").length;
+  const highRiskZoneCount = state.riskZones.filter((zone) => zone.riskLevel === "High").length;
+  const activeShelterCount = state.shelters.filter((shelter) => shelter.status !== "Full").length;
+  const blockedRoadCount = state.roads.filter((road) => road.status === "Blocked").length;
 
   const onRefresh = () => {
     setRefreshedAt("just now");
     showToast({ title: "Situation feed refreshed", detail: "Showing the latest simulated command-center state.", tone: "success" });
   };
-  const onPlaceholder = (label: string) => showToast({ title: `${label} is planned for a later phase`, detail: "This Phase 0 prototype keeps advanced workflows intentionally out of scope.", tone: "info" });
-  const critical = incidents.filter((incident) => incident.severity === "Critical").length;
-  const peopleInPriority = incidents.filter((incident) => incident.severity === "Critical" || incident.severity === "High").reduce((total, incident) => total + incident.peopleAffected, 0);
-  const openShelters = shelters.filter((shelter) => shelter.status !== "Full").length;
+  const onPlaceholder = (label: string) => showToast({ title: `${label} is planned for a later phase`, detail: "Advanced workflows remain intentionally out of scope for this Phase 1 command-center demo.", tone: "info" });
+  const onSelectIncident = (incidentId: string) => setSelectedIncidentId(incidentId);
 
   return (
     <div className="app-shell">
-      <NavigationRail open={sidebarOpen} onClose={() => setSidebarOpen(false)} onPlaceholder={onPlaceholder} />
+      <NavigationRail open={sidebarOpen} onClose={() => setSidebarOpen(false)} onPlaceholder={onPlaceholder} rainfall={primaryRiskZone?.rainfallMm ?? 0} systemStatus={state.systemStatus} />
       <main className="app-main">
         <TopBar
           onMenu={() => setSidebarOpen(true)}
-          onNotifications={() => showToast({ title: "All systems nominal", detail: "No new platform notifications in this simulated session.", tone: "info" })}
+          systemStatus={state.systemStatus}
+          onNotifications={() => showToast({ title: `System ${state.systemStatus.system.toLowerCase()}`, detail: `Network ${state.systemStatus.network.toLowerCase()} · data sync ${state.systemStatus.dataSync.toLowerCase()}.`, tone: "info" })}
         />
         <div className="command-page">
           <div className="command-page__inner">
             <div className="page-heading">
-              <div><span className="page-kicker"><span className="page-kicker__line" /> MONSOON RESPONSE <i>/</i> EASTERN DISTRICT</span><h2>Situation overview</h2><p>One operational picture for changing conditions across the district.</p></div>
-              <div className="page-heading__actions"><StatusBadge tone="warning" dot>PHASE 0 · SIMULATION</StatusBadge><Button variant="secondary" size="sm" icon={RefreshCw} onClick={onRefresh}>Refresh feed</Button></div>
+              <div><span className="page-kicker"><span className="page-kicker__line" /> MONSOON RESPONSE <i>/</i> EASTERN DISTRICT</span><h2>COMMAND CENTER</h2><p>LIVE DISASTER OPERATIONS</p></div>
+              <div className="page-heading__actions"><StatusBadge tone="warning" dot>PHASE 1 · SIMULATION</StatusBadge><Button variant="secondary" size="sm" icon={RefreshCw} onClick={onRefresh}>Refresh feed</Button></div>
             </div>
 
-            <EmergencyBanner onReview={() => setSelectedIncident(incidents[0])} />
+            <EmergencyBanner incident={primaryIncident} waterLevel={primaryRiskZone?.waterLevel ?? 0} onReview={() => onSelectIncident(primaryIncident.id)} />
 
             <section className="kpi-grid" aria-label="Operational indicators">
-              <KpiCard icon={Activity} label="Active incidents" value={String(incidents.length).padStart(2, "0")} note="Across 4 monitored sectors" trend="+02" tone="blue" />
-              <KpiCard icon={AlertTriangle} label="Critical priority" value={String(critical).padStart(2, "0")} note="Requires command attention" tone="red" />
-              <KpiCard icon={Truck} label="Teams reporting" value={String(rescueTeams.length).padStart(2, "0")} note="16 responders · demo state" trend="+01" tone="amber" />
-              <KpiCard icon={Users} label="People in priority zones" value={String(peopleInPriority).padStart(2, "0")} note={`${openShelters} receiving shelters open`} tone="green" />
+              <KpiCard icon={LifeBuoy} label="ACTIVE SOS" value={String(state.systemStatus.activeSOSCount)} note="Across monitored sectors" status="LIVE" statusTone="info" tone="blue" />
+              <KpiCard icon={AlertTriangle} label="CRITICAL INCIDENTS" value={String(criticalCount)} note="Requires immediate attention" status="CRITICAL" statusTone="critical" tone="red" />
+              <KpiCard icon={Truck} label="AVAILABLE RESCUE TEAMS" value={String(availableTeamCount)} note="Ready for deployment" status="AVAILABLE" statusTone="success" tone="green" />
+              <KpiCard icon={Building2} label="SHELTER CAPACITY" value={`${shelterCapacityPercent}%`} note="Current available capacity" status="STABLE" statusTone="success" tone="green" />
+            </section>
+
+            <section className="people-risk-summary" aria-label="People and risk summary">
+              <div className="people-risk-summary__lead"><span className="section-eyebrow">PEOPLE IN PRIORITY ZONES</span><strong><Users size={19} /> {peopleInPriority}</strong><small>Residents within critical and high-risk zones</small></div>
+              <div className="people-risk-summary__metrics">
+                <div><strong>{criticalZoneCount.toString().padStart(2, "0")}</strong><span>CRITICAL ZONES</span></div>
+                <div><strong>{highRiskZoneCount.toString().padStart(2, "0")}</strong><span>HIGH-RISK ZONES</span></div>
+                <div><strong>{activeShelterCount.toString().padStart(2, "0")}</strong><span>ACTIVE SHELTERS</span></div>
+                <div><strong>{blockedRoadCount.toString().padStart(2, "0")}</strong><span>BLOCKED ROADS</span></div>
+              </div>
             </section>
 
             <section className="dashboard-grid" aria-label="Map and priority incidents">
-              <MapPanel onSelectIncident={() => setSelectedIncident(incidents[0])} />
-              <IncidentPanel onSelectIncident={setSelectedIncident} />
+              <MapPanel incidents={state.incidents} rescueTeams={state.rescueTeams} shelters={state.shelters} riskZones={state.riskZones} waterLevel={primaryRiskZone?.waterLevel ?? 0} onSelectIncident={onSelectIncident} />
+              <IncidentPanel incidents={state.incidents} onSelectIncident={onSelectIncident} />
             </section>
 
             <section className="support-grid" aria-label="Response readiness and system status">
-              <ReadinessPanel />
-              <NetworkPanel />
-              <SituationPanel />
+              <ReadinessPanel rescueTeams={state.rescueTeams} />
+              <NetworkPanel systemStatus={state.systemStatus} />
+              <SituationPanel incident={primaryIncident} rainfall={primaryRiskZone?.rainfallMm ?? 0} systemStatus={state.systemStatus} />
             </section>
 
-            <footer className="page-footer"><div><ShieldCheck size={14} /><span>RAKSHA FOUNDATION</span><i /> <span>COMMAND CENTER</span></div><span>SIMULATED OPERATIONAL DATA <b>·</b> REFRESHED {refreshedAt.toUpperCase()}</span><span>DESIGNED FOR RESILIENT RESPONSE</span></footer>
+            <footer className="page-footer"><div><ShieldCheck size={14} /><span>RAKSHA</span><i /> <span>COMMAND CENTER</span></div><span>SIMULATED OPERATIONAL DATA <b>·</b> REFRESHED {refreshedAt.toUpperCase()}</span><span>DESIGNED FOR RESILIENT RESPONSE</span></footer>
           </div>
         </div>
       </main>
-      {selectedIncident && <IncidentDetail incident={selectedIncident} onClose={() => setSelectedIncident(null)} />}
+      {selectedIncident && <IncidentDetail incident={selectedIncident} onClose={() => setSelectedIncidentId(null)} />}
     </div>
   );
 }

@@ -1,123 +1,140 @@
-import type {
-  DisasterZone,
-  Incident,
-  Resource,
-  RescueTeam,
-  Road,
-  Shelter,
-  SOSRequest,
-} from "@/types/disaster";
+import type { OperationsState } from "@/types/disaster";
 
-export const incidents: Incident[] = [
-  {
-    id: "1042",
-    type: "Flash Flood",
-    location: "Sector 04",
-    peopleAffected: 4,
-    vulnerablePeople: 1,
-    severity: "Critical",
-    status: "New",
-    reportedAt: "3 min ago",
-    message:
-      "Water has entered our house. Four people are trapped inside. My grandmother is with us and cannot walk.",
-    coordinates: { x: 71, y: 38 },
+export const demoOperations: OperationsState = {
+  incidents: [
+    {
+      id: "1042",
+      type: "Flash Flood",
+      location: "Sector 04",
+      peopleAffected: 4,
+      vulnerablePeople: 1,
+      vulnerableDescription: "1 elderly person",
+      severity: "Critical",
+      priority: "P0",
+      status: "Awaiting rescue",
+      reportedAt: "3 min ago",
+      message: "Water has entered our house. Four people are trapped inside. My grandmother is with us and cannot walk.",
+      source: "SOS",
+      coordinates: { x: 59, y: 41 },
+      timeline: [
+        { time: "10:42:01", title: "SOS RECEIVED", detail: "Initial alert received · simulated report", tone: "red" },
+        { time: "10:42:03", title: "LOCATION VERIFIED", detail: "Sector 04 · fictional demo location", tone: "blue" },
+        { time: "10:42:04", title: "INCIDENT REGISTERED", detail: "Flash Flood · four people affected", tone: "amber" },
+        { time: "10:42:05", title: "PRIORITY REVIEW REQUIRED", detail: "P0 critical · elderly person reported", tone: "red" },
+      ],
+    },
+    {
+      id: "1041", type: "Water Ingress", location: "Sector 07", peopleAffected: 2, vulnerablePeople: 0,
+      severity: "High", priority: "P1", status: "Under review", reportedAt: "6 min ago",
+      message: "Water is entering ground-floor rooms near the southern channel.", source: "SOS", coordinates: { x: 27, y: 72 }, timeline: [],
+    },
+    {
+      id: "1038", type: "Stranded Citizen", location: "Sector 02", peopleAffected: 1, vulnerablePeople: 0,
+      severity: "Medium", priority: "P2", status: "Under review", reportedAt: "11 min ago",
+      message: "A resident is waiting on the upper level beside the market road.", source: "SOS", coordinates: { x: 21, y: 44 }, timeline: [],
+    },
+    {
+      id: "1040", type: "Flash Flood", location: "Sector 03", peopleAffected: 3, vulnerablePeople: 1,
+      severity: "Critical", priority: "P0", status: "Awaiting rescue", reportedAt: "8 min ago",
+      message: "Fast-moving water is crossing the lower access road.", source: "SOS", coordinates: { x: 39, y: 27 }, timeline: [],
+    },
+    {
+      id: "1039", type: "Bridge Approach Flooding", location: "Sector 09", peopleAffected: 4, vulnerablePeople: 0,
+      severity: "Critical", priority: "P0", status: "Under review", reportedAt: "9 min ago",
+      message: "Floodwater has reached the low bridge approach.", source: "Field report", coordinates: { x: 74, y: 77 }, timeline: [],
+    },
+    {
+      id: "1037", type: "Street Flooding", location: "Sector 05", peopleAffected: 2, vulnerablePeople: 0,
+      severity: "Critical", priority: "P0", status: "Awaiting rescue", reportedAt: "13 min ago",
+      message: "Two households have requested assistance near the lower road.", source: "SOS", coordinates: { x: 79, y: 30 }, timeline: [],
+    },
+    {
+      id: "1036", type: "Canal Overflow", location: "Sector 07", peopleAffected: 3, vulnerablePeople: 1,
+      severity: "Critical", priority: "P0", status: "Under review", reportedAt: "15 min ago",
+      message: "Water is rising beyond the canal path.", source: "SOS", coordinates: { x: 31, y: 78 }, timeline: [],
+    },
+    {
+      id: "1034", type: "Water Ingress", location: "Sector 01", peopleAffected: 2, vulnerablePeople: 0,
+      severity: "Critical", priority: "P0", status: "Under review", reportedAt: "17 min ago",
+      message: "Water has reached the entrance of a residential block.", source: "SOS", coordinates: { x: 14, y: 26 }, timeline: [],
+    },
+    {
+      id: "1032", type: "Evacuation Alert", location: "Sector 02", peopleAffected: 1, vulnerablePeople: 0,
+      severity: "Critical", priority: "P0", status: "Monitoring", reportedAt: "20 min ago",
+      message: "A resident requested help moving away from the flooded lane.", source: "SOS", coordinates: { x: 29, y: 53 }, timeline: [],
+    },
+    {
+      id: "1035", type: "Power Outage", location: "Sector 05", peopleAffected: 8, vulnerablePeople: 0,
+      severity: "High", priority: "P1", status: "Monitoring", reportedAt: "18 min ago",
+      message: "A local power interruption has affected the southern block during heavy rainfall.", source: "Sensor", coordinates: { x: 68, y: 19 }, timeline: [],
+    },
+    {
+      id: "1033", type: "Underpass Flooding", location: "Sector 03", peopleAffected: 5, vulnerablePeople: 0,
+      severity: "High", priority: "P1", status: "Under review", reportedAt: "22 min ago",
+      message: "Standing water has closed the underpass during the storm.", source: "Sensor", coordinates: { x: 45, y: 34 }, timeline: [],
+    },
+    {
+      id: "1031", type: "Drainage Surge", location: "Sector 09", peopleAffected: 2, vulnerablePeople: 0,
+      severity: "Moderate", priority: "P2", status: "Monitoring", reportedAt: "31 min ago",
+      message: "Drainage levels are elevated near the river bend.", source: "Sensor", coordinates: { x: 84, y: 64 }, timeline: [],
+    },
+    {
+      id: "1030", type: "Access Obstruction", location: "Sector 01", peopleAffected: 1, vulnerablePeople: 0,
+      severity: "Medium", priority: "P2", status: "Monitoring", reportedAt: "34 min ago",
+      message: "A simulated road obstruction has been reported near the civic hall.", source: "Field report", coordinates: { x: 10, y: 53 }, timeline: [],
+    },
+  ],
+  rescueTeams: [
+    { id: "team-bravo", name: "TEAM BRAVO", members: 3, status: "En route", location: "Sector 04 approach", vehicle: "High-water rescue unit", availability: 84, role: "Flood rescue", coordinates: { x: 55, y: 49 }, assignedIncidentId: "1042", etaMinutes: 11 },
+    { id: "team-alpha", name: "TEAM ALPHA", members: 4, status: "Available", location: "Sector 03 staging point", vehicle: "Rapid response", availability: 100, role: "Rescue response", coordinates: { x: 35, y: 58 } },
+    { id: "team-charlie", name: "TEAM CHARLIE", members: 5, status: "Available", location: "Sector 05 medical post", vehicle: "Medical transport", availability: 100, role: "Medical support", coordinates: { x: 69, y: 62 } },
+    { id: "team-delta", name: "TEAM DELTA", members: 4, status: "Available", location: "Sector 01 depot", vehicle: "High-clearance unit", availability: 100, role: "Rescue response", coordinates: { x: 17, y: 35 } },
+    { id: "team-echo", name: "TEAM ECHO", members: 4, status: "Available", location: "Sector 09 staging point", vehicle: "Water rescue", availability: 100, role: "Water rescue", coordinates: { x: 82, y: 57 } },
+    { id: "team-foxtrot", name: "TEAM FOXTROT", members: 3, status: "Available", location: "Sector 02 depot", vehicle: "Rapid response", availability: 100, role: "Rescue response", coordinates: { x: 14, y: 61 } },
+    { id: "team-golf", name: "TEAM GOLF", members: 4, status: "Available", location: "Sector 05 depot", vehicle: "High-clearance unit", availability: 100, role: "Transport support", coordinates: { x: 88, y: 40 } },
+    { id: "team-hotel", name: "TEAM HOTEL", members: 3, status: "Available", location: "Sector 07 depot", vehicle: "Water rescue", availability: 100, role: "Water rescue", coordinates: { x: 38, y: 83 } },
+    { id: "team-india", name: "TEAM INDIA", members: 4, status: "Available", location: "Central depot", vehicle: "Medical transport", availability: 100, role: "Medical support", coordinates: { x: 49, y: 72 } },
+  ],
+  shelters: [
+    { id: "shelter-01", name: "SHELTER 01", location: "Civic Hall East · Sector 01", capacity: 200, occupancy: 80, status: "Open", coordinates: { x: 15, y: 37 } },
+    { id: "shelter-07", name: "SHELTER 07", location: "North School Gym · Sector 07", capacity: 180, occupancy: 54, status: "Open", coordinates: { x: 32, y: 69 } },
+    { id: "shelter-12", name: "SHELTER 12", location: "Riverside Centre · Sector 04", capacity: 160, occupancy: 48, status: "Open", coordinates: { x: 64, y: 54 } },
+    { id: "shelter-04", name: "SHELTER 04", location: "District Learning Hall · Sector 03", capacity: 160, occupancy: 52, status: "Open", coordinates: { x: 42, y: 43 } },
+    { id: "shelter-09", name: "SHELTER 09", location: "West Community Hall · Sector 09", capacity: 150, occupancy: 48, status: "Limited", coordinates: { x: 80, y: 71 } },
+    { id: "shelter-03", name: "SHELTER 03", location: "Civic School Annex · Sector 05", capacity: 150, occupancy: 38, status: "Open", coordinates: { x: 75, y: 43 } },
+  ],
+  riskZones: [
+    { id: "zone-04-east", name: "Eastern floodplain", sector: "Sector 04", type: "Flood", riskLevel: "Critical", waterLevel: 2.4, rainfallMm: 86, peopleAffected: 6, coordinates: { x: 59, y: 41 }, radius: 9 },
+    { id: "zone-07-south", name: "Southern lowlands", sector: "Sector 07", type: "Flood", riskLevel: "Critical", waterLevel: 1.9, rainfallMm: 72, peopleAffected: 4, coordinates: { x: 26, y: 74 }, radius: 7 },
+    { id: "zone-02-market", name: "Market catchment", sector: "Sector 02", type: "Flood", riskLevel: "High", waterLevel: 1.2, rainfallMm: 61, peopleAffected: 3, coordinates: { x: 21, y: 45 }, radius: 7 },
+    { id: "zone-03-drain", name: "Lower drainage corridor", sector: "Sector 03", type: "Flood", riskLevel: "High", rainfallMm: 68, peopleAffected: 2, coordinates: { x: 39, y: 27 }, radius: 6 },
+    { id: "zone-05-road", name: "Eastern access roads", sector: "Sector 05", type: "Storm", riskLevel: "High", rainfallMm: 54, peopleAffected: 4, coordinates: { x: 79, y: 30 }, radius: 6 },
+    { id: "zone-09-bend", name: "River bend", sector: "Sector 09", type: "Flood", riskLevel: "High", waterLevel: 1.1, rainfallMm: 59, peopleAffected: 5, coordinates: { x: 74, y: 77 }, radius: 7 },
+    { id: "zone-01-channel", name: "North channel", sector: "Sector 01", type: "Flood", riskLevel: "Moderate", rainfallMm: 45, peopleAffected: 0, coordinates: { x: 16, y: 22 }, radius: 5 },
+    { id: "zone-05-rain", name: "Upper rain band", sector: "Sector 05", type: "Storm", riskLevel: "Moderate", rainfallMm: 42, peopleAffected: 0, coordinates: { x: 66, y: 18 }, radius: 5 },
+    { id: "zone-01-civic", name: "Civic district", sector: "Sector 01", type: "Flood", riskLevel: "Safe", rainfallMm: 22, peopleAffected: 0, coordinates: { x: 12, y: 57 }, radius: 5 },
+    { id: "zone-03-hill", name: "Upper access", sector: "Sector 03", type: "Landslide", riskLevel: "Safe", rainfallMm: 18, peopleAffected: 0, coordinates: { x: 46, y: 80 }, radius: 5 },
+    { id: "zone-09-upland", name: "Western upland", sector: "Sector 09", type: "Storm", riskLevel: "Safe", rainfallMm: 20, peopleAffected: 0, coordinates: { x: 88, y: 55 }, radius: 5 },
+  ],
+  roads: [
+    { id: "road-01", name: "Embankment Way", sector: "Sector 04", status: "Blocked", note: "Standing water reported" },
+    { id: "road-02", name: "Market Loop", sector: "Sector 02", status: "Blocked", note: "Flood depth exceeds safe passage" },
+    { id: "road-03", name: "Old Bridge Approach", sector: "Sector 05", status: "Blocked", note: "Water-level threshold exceeded" },
+    { id: "road-04", name: "Civic Avenue", sector: "Sector 01", status: "Open" },
+    { id: "road-05", name: "North Connector", sector: "Sector 03", status: "Open" },
+    { id: "road-06", name: "South Channel Road", sector: "Sector 07", status: "Restricted", note: "Use high-clearance vehicles" },
+  ],
+  resources: [
+    { id: "resource-01", name: "First-aid kits", category: "Medical", available: 86, unit: "kits", location: "Central depot" },
+    { id: "resource-02", name: "Inflatable rescue boats", category: "Rescue", available: 7, unit: "boats", location: "North boathouse" },
+    { id: "resource-03", name: "Water & meal packs", category: "Relief", available: 320, unit: "packs", location: "Sector 01" },
+    { id: "resource-04", name: "High-clearance vehicles", category: "Transport", available: 5, unit: "vehicles", location: "Central depot" },
+  ],
+  systemStatus: {
+    network: "Connected",
+    dataSync: "Live",
+    system: "Operational",
+    lastSync: "Just now",
+    activeSOSCount: 24,
   },
-  {
-    id: "1038",
-    type: "Street Flooding",
-    location: "Sector 02",
-    peopleAffected: 12,
-    vulnerablePeople: 2,
-    severity: "High",
-    status: "Assessing",
-    reportedAt: "11 min ago",
-    message: "Water is rising across the lower road near the market. Several homes are cut off.",
-    coordinates: { x: 43, y: 57 },
-  },
-  {
-    id: "1035",
-    type: "Power Outage",
-    location: "Sector 07",
-    peopleAffected: 8,
-    vulnerablePeople: 0,
-    severity: "High",
-    status: "Monitoring",
-    reportedAt: "18 min ago",
-    message: "A local power interruption has affected the southern block during heavy rainfall.",
-    coordinates: { x: 28, y: 32 },
-  },
-  {
-    id: "1031",
-    type: "Slope Movement",
-    location: "Sector 11",
-    peopleAffected: 2,
-    vulnerablePeople: 0,
-    severity: "Moderate",
-    status: "Monitoring",
-    reportedAt: "31 min ago",
-    message: "A small section of hillside has shifted. Access remains under observation.",
-    coordinates: { x: 56, y: 74 },
-  },
-];
-
-export const rescueTeams: RescueTeam[] = [
-  { id: "team-delta", name: "Team Delta", members: 4, status: "Mobilizing", location: "Sector 03", vehicle: "High-water unit", availability: 72 },
-  { id: "team-bravo", name: "Team Bravo", members: 3, status: "On scene", location: "Sector 02", vehicle: "Rapid response", availability: 46 },
-  { id: "team-north", name: "North Medical", members: 5, status: "Staged", location: "Central depot", vehicle: "Medical transport", availability: 100 },
-  { id: "team-echo", name: "Team Echo", members: 4, status: "Available", location: "Sector 08", vehicle: "Water rescue", availability: 100 },
-];
-
-export const shelters: Shelter[] = [
-  { id: "shelter-01", name: "Civic Hall East", location: "Sector 01", capacity: 240, occupancy: 148, status: "Open" },
-  { id: "shelter-02", name: "North School Gym", location: "Sector 06", capacity: 180, occupancy: 142, status: "Limited" },
-  { id: "shelter-03", name: "Riverside Community Centre", location: "Sector 09", capacity: 120, occupancy: 38, status: "Open" },
-];
-
-export const resources: Resource[] = [
-  { id: "resource-01", name: "First-aid kits", category: "Medical", available: 86, unit: "kits", location: "Central depot" },
-  { id: "resource-02", name: "Inflatable rescue boats", category: "Rescue", available: 7, unit: "boats", location: "North boathouse" },
-  { id: "resource-03", name: "Water & meal packs", category: "Relief", available: 320, unit: "packs", location: "Sector 01" },
-  { id: "resource-04", name: "High-clearance vehicles", category: "Transport", available: 5, unit: "vehicles", location: "Central depot" },
-];
-
-export const roads: Road[] = [
-  { id: "road-01", name: "Embankment Way", sector: "Sector 04", status: "Restricted", note: "Standing water reported" },
-  { id: "road-02", name: "Market Loop", sector: "Sector 02", status: "Open" },
-  { id: "road-03", name: "Old Bridge Approach", sector: "Sector 05", status: "Closed", note: "Water-level threshold exceeded" },
-];
-
-export const disasterZones: DisasterZone[] = [
-  { id: "zone-04", name: "Eastern floodplain", type: "Flood", severity: "Critical", waterLevel: 2.4, rainfallMm: 86, coordinates: { x: 64, y: 45 } },
-  { id: "zone-02", name: "Market catchment", type: "Flood", severity: "High", waterLevel: 1.2, rainfallMm: 61, coordinates: { x: 42, y: 56 } },
-  { id: "zone-11", name: "Northern slope", type: "Landslide", severity: "Moderate", rainfallMm: 48, coordinates: { x: 55, y: 22 } },
-];
-
-export const sosRequests: SOSRequest[] = [
-  {
-    id: "SOS-1042",
-    incidentId: "1042",
-    receivedAt: "3 min ago",
-    people: 4,
-    vulnerablePeople: 1,
-    priority: "Critical",
-    summary:
-      "Water has entered our house. Four people are trapped inside. My grandmother is with us and cannot walk.",
-    location: "Sector 04",
-  },
-  {
-    id: "SOS-1038",
-    incidentId: "1038",
-    receivedAt: "11 min ago",
-    people: 12,
-    vulnerablePeople: 2,
-    priority: "High",
-    summary: "Water is rising across the lower road near the market. Several homes are cut off.",
-    location: "Sector 02",
-  },
-];
-
-export const systemSignals = [
-  { id: "rainfall", name: "Rainfall gauges", source: "Regional sensor network", status: "Connected", latency: "4 sec" },
-  { id: "radio", name: "District radio mesh", source: "Emergency communications", status: "Strong signal", latency: "12 sec" },
-  { id: "satellite", name: "Satellite uplink", source: "Backup communications", status: "Standby", latency: "—" },
-] as const;
+};

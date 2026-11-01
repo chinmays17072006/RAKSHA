@@ -2,6 +2,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ToastProvider } from "./components/system/feedback";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { OperationsProvider } from "./features/command-center/OperationsContext";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 
@@ -19,9 +20,11 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
-        <ToastProvider>
-          <Router />
-        </ToastProvider>
+        <OperationsProvider>
+          <ToastProvider>
+            <Router />
+          </ToastProvider>
+        </OperationsProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

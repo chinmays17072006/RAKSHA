@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { ArrowUpRight, LoaderCircle, TriangleAlert } from "lucide-react";
-import type { Severity } from "@/types/disaster";
+import type { IncidentPriority, Severity } from "@/types/disaster";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 
@@ -76,22 +76,24 @@ export function StatusBadge({
 const severityClass: Record<Severity, string> = {
   Critical: "critical",
   High: "high",
+  Medium: "moderate",
   Moderate: "moderate",
   Low: "low",
 };
 
 const severityCode: Record<Severity, string> = {
-  Critical: "P1",
-  High: "P2",
+  Critical: "P0",
+  High: "P1",
+  Medium: "P2",
   Moderate: "P3",
-  Low: "P4",
+  Low: "P3",
 };
 
-export function SeverityBadge({ severity, compact = false }: { severity: Severity; compact?: boolean }) {
+export function SeverityBadge({ severity, priority, compact = false }: { severity: Severity; priority?: IncidentPriority; compact?: boolean }) {
   return (
     <span className={`severity-badge severity-badge--${severityClass[severity]}`}>
-      <span>{severityCode[severity]}</span>
-      {!compact && <span>{severity}</span>}
+      <span>{priority ?? severityCode[severity]}</span>
+      {!compact && <span>{severity.toUpperCase()}</span>}
     </span>
   );
 }
@@ -102,6 +104,8 @@ export function KpiCard({
   value,
   note,
   trend,
+  status,
+  statusTone = "info",
   tone = "blue",
 }: {
   icon: LucideIcon;
@@ -109,6 +113,8 @@ export function KpiCard({
   value: string;
   note: string;
   trend?: string;
+  status?: string;
+  statusTone?: "critical" | "warning" | "success" | "info";
   tone?: "blue" | "red" | "amber" | "green";
 }) {
   return (
@@ -116,7 +122,7 @@ export function KpiCard({
       <div className="kpi-card__top">
         <span className="kpi-card__icon"><Icon size={16} strokeWidth={1.8} aria-hidden="true" /></span>
         <span className="kpi-card__label">{label}</span>
-        {trend && <span className="kpi-card__trend">{trend}</span>}
+        {status ? <span className={`kpi-card__status kpi-card__status--${statusTone}`}>{status}</span> : trend && <span className="kpi-card__trend">{trend}</span>}
       </div>
       <div className="kpi-card__value">{value}</div>
       <div className="kpi-card__note">{note}</div>
