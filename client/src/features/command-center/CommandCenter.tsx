@@ -22,6 +22,7 @@ import {
   Radio,
   RadioTower,
   RefreshCw,
+  Route as RouteIcon,
   Shield,
   ShieldCheck,
   Signal,
@@ -47,7 +48,7 @@ import {
   type DataColumn,
 } from "@/components/system/ui";
 
-export type OperationsPage = "command" | "citizen-sos" | "ai-triage";
+export type OperationsPage = "command" | "citizen-sos" | "ai-triage" | "safe-routing";
 
 const navigation = [
   { label: "Command Center", icon: LayoutDashboard, route: "/", activePage: "command" },
@@ -56,6 +57,7 @@ const navigation = [
   { label: "Shelters & Resources", icon: Building2, phase: "NEXT" },
   { label: "Citizen SOS", icon: LifeBuoy, route: "/citizen-sos", activePage: "citizen-sos" },
   { label: "AI Triage", icon: BrainCircuit, route: "/ai-triage", activePage: "ai-triage" },
+  { label: "Safe Routing", icon: RouteIcon, route: "/safe-routing", activePage: "safe-routing" },
   { label: "Offline Mode", icon: WifiOff, phase: "NEXT" },
 ] as const;
 
@@ -142,7 +144,7 @@ export function NavigationRail({
           <div><strong>SYSTEM {systemStatus.system.toUpperCase()}</strong><span>Network {systemStatus.network.toLowerCase()} · sync {systemStatus.dataSync.toLowerCase()}</span></div>
           <CheckCircle2 size={15} aria-hidden="true" />
         </div>
-        <div className="sidebar__version">RAKSHA <span>•</span> {activePage === "command" ? "COMMAND CENTER · PHASE 1" : activePage === "citizen-sos" ? "CITIZEN SOS · PHASE 2" : "AI TRIAGE · PHASE 3"}</div>
+        <div className="sidebar__version">RAKSHA <span>•</span> {activePage === "command" ? "COMMAND CENTER · PHASE 1" : activePage === "citizen-sos" ? "CITIZEN SOS · PHASE 2" : activePage === "ai-triage" ? "AI TRIAGE · PHASE 3" : "SAFE ROUTING · PHASE 4"}</div>
       </aside>
     </>
   );
@@ -434,8 +436,18 @@ function IncidentDetail({ incident, onClose }: { incident: Incident; onClose: ()
           <div><span>MEDICAL SUPPORT</span><strong>{incident.medicalSupport ?? "Recommended"}</strong></div>
         </section>}
         <div className="incident-detail__ai"><span><span className="section-eyebrow">AI TRIAGE</span><small>{triageComplete ? `Local rule result · ${incident.aiConfidence ?? 0}% confidence` : manualReview ? "Insufficient information · operator review required" : "Local deterministic rule analysis available."}</small></span><StatusBadge tone={triageComplete ? "success" : manualReview ? "warning" : "info"}>{triageComplete ? "AI TRIAGE COMPLETE" : manualReview ? "MANUAL REVIEW REQUIRED" : "PENDING — AI TRIAGE"}</StatusBadge></div>
-        {triageComplete && incident.aiAssessment && <p className="incident-detail__ai-assessment"><strong>AI ASSESSMENT</strong>{incident.aiAssessment}</p>}
+      {triageComplete && incident.aiAssessment && <p className="incident-detail__ai-assessment"><strong>AI ASSESSMENT</strong>{incident.aiAssessment}</p>}
       </>}
+      {incident.routeAnalysisStatus === "Complete" && incident.recommendedRoute && incident.destinationShelter && <section className="incident-detail__route" aria-label="Evacuation route">
+        <div><span className="section-eyebrow">EVACUATION ROUTE</span><StatusBadge tone="success" dot>SAFE ROUTE FOUND</StatusBadge></div>
+        <strong>{incident.recommendedRoute} <i>→</i> {incident.destinationShelter}</strong>
+        <small>{incident.routeDistanceKm?.toFixed(1)} km · {incident.routeEta} min · {incident.routeRisk?.toUpperCase()} RISK</small>
+      </section>}
+      {incident.routeAnalysisStatus === "No safe route" && <section className="incident-detail__route incident-detail__route--warning" aria-label="Evacuation route">
+        <div><span className="section-eyebrow">EVACUATION ROUTE</span><StatusBadge tone="warning" dot>MANUAL REVIEW</StatusBadge></div>
+        <strong>NO SAFE ROUTE AVAILABLE</strong>
+        <small>Manual operator review required.</small>
+      </section>}
       {incident.timeline.length > 0 && <section className="incident-detail__timeline">
         <span className="section-eyebrow">INCIDENT TIMELINE</span>
         <div className="incident-detail__timeline-list">
@@ -578,7 +590,7 @@ export default function CommandCenter() {
   const criticalZoneCount = state.riskZones.filter((zone) => zone.riskLevel === "Critical").length;
   const highRiskZoneCount = state.riskZones.filter((zone) => zone.riskLevel === "High").length;
   const activeShelterCount = state.shelters.filter((shelter) => shelter.status !== "Full").length;
-  const blockedRoadCount = state.roads.filter((road) => road.status === "Blocked").length;
+  const blockedRoadCount = state.roads.filter((road) => road.network !== "evacuation" && road.status === "Blocked").length;
 
   const onRefresh = () => {
     setRefreshedAt("just now");

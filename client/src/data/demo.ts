@@ -96,9 +96,9 @@ export const demoOperations: OperationsState = {
     { id: "team-india", name: "TEAM INDIA", members: 4, status: "Available", location: "Central depot", vehicle: "Medical transport", availability: 100, role: "Medical support", coordinates: { x: 49, y: 72 } },
   ],
   shelters: [
-    { id: "shelter-01", name: "SHELTER 01", location: "Civic Hall East · Sector 01", capacity: 200, occupancy: 80, status: "Open", coordinates: { x: 15, y: 37 } },
-    { id: "shelter-07", name: "SHELTER 07", location: "North School Gym · Sector 07", capacity: 180, occupancy: 54, status: "Open", coordinates: { x: 32, y: 69 } },
-    { id: "shelter-12", name: "SHELTER 12", location: "Riverside Centre · Sector 04", capacity: 160, occupancy: 48, status: "Open", coordinates: { x: 64, y: 54 } },
+    { id: "shelter-01", name: "SHELTER 01", location: "Civic Hall East · Sector 01", capacity: 200, occupancy: 80, status: "Open", coordinates: { x: 15, y: 37 }, routeCapacityPercent: 82, routeDistanceKm: 4.2, routeAccess: "Higher risk" },
+    { id: "shelter-07", name: "SHELTER 07", location: "North School Gym · Sector 07", capacity: 180, occupancy: 54, status: "Open", coordinates: { x: 32, y: 69 }, routeCapacityPercent: 32, routeDistanceKm: 6.2, routeAccess: "Safe" },
+    { id: "shelter-12", name: "SHELTER 12", location: "Riverside Centre · Sector 04", capacity: 160, occupancy: 48, status: "Open", coordinates: { x: 64, y: 54 }, routeCapacityPercent: 91, routeDistanceKm: 3.8, routeAccess: "High risk" },
     { id: "shelter-04", name: "SHELTER 04", location: "District Learning Hall · Sector 03", capacity: 160, occupancy: 52, status: "Open", coordinates: { x: 42, y: 43 } },
     { id: "shelter-09", name: "SHELTER 09", location: "West Community Hall · Sector 09", capacity: 150, occupancy: 48, status: "Limited", coordinates: { x: 80, y: 71 } },
     { id: "shelter-03", name: "SHELTER 03", location: "Civic School Annex · Sector 05", capacity: 150, occupancy: 38, status: "Open", coordinates: { x: 75, y: 43 } },
@@ -123,6 +123,9 @@ export const demoOperations: OperationsState = {
     { id: "road-04", name: "Civic Avenue", sector: "Sector 01", status: "Open" },
     { id: "road-05", name: "North Connector", sector: "Sector 03", status: "Open" },
     { id: "road-06", name: "South Channel Road", sector: "Sector 07", status: "Restricted", note: "Use high-clearance vehicles" },
+    { id: "route-a", name: "Road A", sector: "Sector 04 → Shelter 01", status: "Blocked", network: "evacuation", distanceKm: 4.8, etaMinutes: 9, floodRisk: "Critical", safety: "Unsafe", safetyScore: 5, reason: "Road submerged by floodwater.", destinationShelterId: "shelter-01" },
+    { id: "route-b", name: "Road B", sector: "Sector 04 → Shelter 12", status: "Open", network: "evacuation", distanceKm: 5.4, etaMinutes: 10, floodRisk: "High", safety: "High risk", safetyScore: 48, reason: "Water level rising near eastern section.", destinationShelterId: "shelter-12" },
+    { id: "route-c", name: "Road C", sector: "Sector 04 → Shelter 07", status: "Open", network: "evacuation", distanceKm: 6.2, etaMinutes: 11, floodRisk: "Low", safety: "Safe", safetyScore: 96, reason: "Clear access with low flood exposure.", destinationShelterId: "shelter-07" },
   ],
   resources: [
     { id: "resource-01", name: "First-aid kits", category: "Medical", available: 86, unit: "kits", location: "Central depot" },

@@ -35,6 +35,13 @@ export interface Incident {
   aiConfidence?: number;
   aiAssessment?: string;
   triagedAt?: string;
+  routeAnalysisStatus?: "Complete" | "No safe route";
+  recommendedRoute?: string;
+  destinationShelter?: string;
+  routeDistanceKm?: number;
+  routeEta?: number;
+  routeRisk?: "Critical" | "High" | "Moderate" | "Low";
+  routeGeneratedAt?: string;
 }
 
 export interface RescueTeam {
@@ -59,6 +66,9 @@ export interface Shelter {
   occupancy: number;
   status: "Open" | "Limited" | "Full";
   coordinates: { x: number; y: number };
+  routeCapacityPercent?: number;
+  routeDistanceKm?: number;
+  routeAccess?: "Safe" | "High risk" | "Higher risk";
 }
 
 export interface Resource {
@@ -75,6 +85,14 @@ export interface Road {
   name: string;
   sector: string;
   status: "Open" | "Restricted" | "Closed" | "Blocked";
+  network?: "district" | "evacuation";
+  distanceKm?: number;
+  etaMinutes?: number;
+  floodRisk?: "Critical" | "High" | "Moderate" | "Low";
+  safety?: "Unsafe" | "High risk" | "Safe";
+  safetyScore?: number;
+  reason?: string;
+  destinationShelterId?: string;
   note?: string;
 }
 

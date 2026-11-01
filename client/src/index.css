@@ -912,3 +912,201 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible { outline: 
   .ai-triage-timeline .timeline-item { grid-template-columns: 22px minmax(0,1fr) auto; }
   .ai-triage-timeline .timeline-item__copy strong { white-space: normal; }
 }
+
+
+/* Phase 4 — safety-first local evacuation routing */
+.safe-routing-page { max-width: 1540px; }
+.safe-routing-heading { margin-bottom: 12px; }
+.safe-routing-heading__support { display: block; margin-top: 7px; color: #91a4ac; font-size: 9px; line-height: 1.45; }
+.safe-routing-note { display: flex; align-items: flex-start; gap: 9px; margin: 0 0 12px; padding: 9px 11px; border: 1px solid rgba(83,199,220,.17); border-radius: 4px; background: rgba(83,199,220,.035); color: #8fa7ae; font-size: 8px; line-height: 1.45; }
+.safe-routing-note svg { flex: 0 0 auto; color: var(--cyan); }
+.safe-routing-note strong { margin-right: 5px; color: #b6d2d8; font-size: 7px; letter-spacing: .09em; }
+.safe-routing-empty { display: flex; min-height: 230px; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; text-align: center; }
+.safe-routing-empty > svg { color: var(--cyan); }
+.safe-routing-empty > strong { color: #dce6e8; font-family: var(--font-display); font-size: 15px; }
+.safe-routing-empty > span { max-width: 450px; color: #81959c; font-size: 9px; line-height: 1.5; }
+.safe-routing-empty > div { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
+.safe-routing-incident-bar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 12px; padding: 11px 14px; border-left: 2px solid var(--red); }
+.safe-routing-incident-bar__identity { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.safe-routing-incident-bar__icon { display: grid; width: 33px; height: 33px; flex: 0 0 auto; place-items: center; border: 1px solid rgba(241,116,108,.25); border-radius: 4px; background: rgba(241,116,108,.08); color: #ef8a7c; }
+.safe-routing-incident-bar__identity > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.safe-routing-incident-bar__identity strong { overflow: hidden; color: #e3ebec; font-family: var(--font-display); font-size: 12px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.safe-routing-incident-bar__identity strong i { color: #697e85; font-style: normal; }
+.safe-routing-incident-bar__identity small { color: #80939a; font-size: 8px; }
+.safe-routing-incident-bar__status { display: flex; align-items: center; gap: 8px; }
+.safe-routing-prerequisite { display: flex; align-items: center; gap: 9px; margin-bottom: 11px; padding: 8px 10px; border: 1px solid rgba(242,184,94,.2); border-radius: 4px; background: rgba(242,184,94,.035); color: #b29a6d; font-size: 8px; }
+.safe-routing-prerequisite > svg { flex: 0 0 auto; color: var(--amber); }
+.safe-routing-prerequisite > span { flex: 1; }
+.safe-routing-main-grid { display: grid; grid-template-columns: minmax(0,1.18fr) minmax(300px,.82fr); gap: 12px; }
+.safe-routing-map-card, .safe-routing-analysis-card, .safe-routing-result-card, .safe-routing-why-card, .safe-routing-comparison-card, .safe-routing-shelter-card { min-width: 0; padding: 14px; }
+.safe-routing-card-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.safe-routing-card-heading .section-heading h2 { font-size: 14px; }
+.safe-route-map__frame { position: relative; margin-top: 10px; overflow: hidden; border: 1px solid #253a43; border-radius: 4px; background: #0e1a20; }
+.safe-route-map { display: block; width: 100%; height: auto; min-height: 226px; aspect-ratio: 900 / 360; }
+.safe-route-map__district { fill: #8799a0; font: 700 10px "DM Sans", sans-serif; letter-spacing: 1.3px; }
+.safe-route-map__map-note { fill: #647981; font: 700 7px "DM Sans", sans-serif; letter-spacing: 1px; }
+.safe-route-map__sector-label { fill: #6d828a; font: 700 8px "DM Sans", sans-serif; letter-spacing: .8px; }
+.safe-route-map__road { fill: none; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; cursor: pointer; transition: stroke-width .18s ease, filter .18s ease, opacity .18s ease; }
+.safe-route-map__road--road-a { stroke: #df6963; stroke-dasharray: 9 7; opacity: .8; }
+.safe-route-map__road--road-b { stroke: #d9a851; stroke-dasharray: 2 8; opacity: .87; }
+.safe-route-map__road--road-c { stroke: #599e7c; opacity: .87; }
+.safe-route-map__road.is-recommended { stroke: #7ac49b; stroke-width: 9; filter: drop-shadow(0 0 6px rgba(114,196,154,.48)); opacity: 1; }
+.safe-route-map__route-group.is-selected .safe-route-map__road:not(.is-recommended) { stroke-width: 8; filter: brightness(1.2); }
+.safe-route-map__road:focus-visible { stroke-width: 10; filter: drop-shadow(0 0 5px rgba(83,199,220,.5)); outline: none; }
+.safe-route-map__road-label { fill: #d6e0e1; stroke: #0d171c; stroke-width: 4px; paint-order: stroke; font: 700 8px "DM Sans", sans-serif; letter-spacing: .6px; pointer-events: none; }
+.safe-route-map__road-label--road-a { fill: #f08b82; }
+.safe-route-map__road-label--road-b { fill: #e7bf72; }
+.safe-route-map__road-label--road-c { fill: #a4d9b6; }
+.safe-route-map__incident circle:first-child { fill: rgba(241,116,108,.1); stroke: rgba(241,116,108,.38); stroke-width: 1; }
+.safe-route-map__incident circle:nth-child(2) { fill: #572d30; stroke: #ed897e; stroke-width: 1.4; }
+.safe-route-map__incident path { fill: #ffb2a3; }
+.safe-route-map__incident text { fill: #ffd5ca; font: 700 8px "DM Sans", sans-serif; letter-spacing: .5px; }
+.safe-route-map__shelter rect { fill: #19342d; stroke: #72c49a; stroke-width: 1.3; }
+.safe-route-map__shelter path { fill: none; stroke: #a3d9b6; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+.safe-route-map__shelter text { fill: #b4d6bf; font: 700 7px "DM Sans", sans-serif; letter-spacing: .45px; }
+.safe-route-map__shelter.is-recommended rect { fill: #24503a; stroke: #91ddb0; stroke-width: 2; filter: drop-shadow(0 0 6px rgba(114,196,154,.45)); }
+.safe-route-map__shelter--muted { opacity: .58; }
+.safe-route-map__toolbar { position: absolute; top: 9px; right: 9px; display: flex; gap: 6px; }
+.safe-route-map__toolbar span { display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px; border: 1px solid rgba(83,199,220,.16); border-radius: 3px; background: rgba(10,20,25,.88); color: #85b9c1; font-size: 6px; font-weight: 700; letter-spacing: .08em; }
+.safe-route-map__toolbar svg { color: var(--cyan); }
+.safe-route-map__legend { display: flex; flex-wrap: wrap; gap: 7px 13px; padding: 8px 2px 0; color: #91a3a8; font-size: 7px; }
+.safe-route-map__legend span { display: inline-flex; align-items: center; gap: 5px; }
+.safe-route-map__legend svg { color: var(--green); }
+.safe-route-map__legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+.safe-route-map__legend-dot--blocked { background: var(--red); }
+.safe-route-map__legend-dot--risk { background: var(--amber); }
+.safe-route-map__legend-dot--safe { background: var(--green); }
+.safe-route-map__selected { position: absolute; right: 12px; bottom: 34px; display: flex; width: min(245px,calc(100% - 24px)); flex-direction: column; gap: 6px; padding: 11px; border: 1px solid #35525c; border-radius: 4px; background: rgba(14,28,35,.97); box-shadow: 0 8px 24px rgba(0,0,0,.34); animation: dialog-in .15s ease-out; }
+.safe-route-map__selected > strong { display: flex; align-items: center; justify-content: space-between; gap: 5px; color: #e4eded; font-size: 10px; }
+.safe-route-map__selected > span:not(.section-eyebrow) { color: #a4b9bb; font-size: 8px; line-height: 1.4; }
+.safe-route-map__selected > small { color: #7f969c; font-size: 7px; }
+.safe-route-map__close { position: absolute; top: 3px; right: 4px; width: 23px; height: 23px; }
+.safe-routing-analysis-card { display: flex; flex-direction: column; }
+.safe-routing-analysis-card__head { display: flex; align-items: center; gap: 9px; }
+.safe-routing-analysis-card__icon { display: grid; width: 31px; height: 31px; flex: 0 0 auto; place-items: center; border: 1px solid rgba(83,199,220,.22); border-radius: 4px; background: rgba(83,199,220,.06); color: var(--cyan); }
+.safe-routing-analysis-card__head > div { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.safe-routing-analysis-card__head > div > strong { color: #d9e4e6; font-size: 9px; font-weight: 600; }
+.safe-routing-analysis-card > p { margin: 12px 0 14px; color: #82969d; font-size: 8px; line-height: 1.55; }
+.safe-routing-analyze { width: 100%; min-height: 37px; justify-content: center; font-size: 8px; letter-spacing: .07em; }
+.safe-routing-analyze:disabled { opacity: .55; }
+.safe-routing-steps { display: flex; flex-direction: column; gap: 4px; margin: 12px 0 0; padding: 0; list-style: none; }
+.safe-routing-steps li { display: grid; grid-template-columns: 19px minmax(0,1fr) auto; align-items: center; gap: 7px; min-height: 26px; padding: 3px 5px; border: 1px solid transparent; border-radius: 3px; color: #657880; }
+.safe-routing-steps li.is-active { border-color: rgba(83,199,220,.17); background: rgba(83,199,220,.04); color: #a9d9df; }
+.safe-routing-steps li.is-complete { color: #83c5a4; }
+.safe-routing-step__icon { display: grid; width: 17px; height: 17px; place-items: center; border: 1px solid rgba(120,147,157,.22); border-radius: 50%; color: inherit; font-size: 7px; }
+.safe-routing-steps li.is-active .safe-routing-step__icon { border-color: rgba(83,199,220,.4); color: var(--cyan); }
+.safe-routing-steps li.is-complete .safe-routing-step__icon { border-color: rgba(114,196,154,.28); background: rgba(114,196,154,.07); }
+.safe-routing-step__label { font-size: 7px; font-weight: 700; letter-spacing: .075em; }
+.safe-routing-step__state { font-size: 6px; font-weight: 700; letter-spacing: .07em; }
+.safe-routing-command-link { width: 100%; margin-top: 10px; justify-content: center; }
+.safe-routing-ready-note { display: flex; align-items: center; gap: 6px; margin-top: 12px; padding-top: 9px; border-top: 1px solid var(--line-soft); color: #788d94; font-size: 7px; }
+.safe-routing-ready-note svg { color: var(--cyan); }
+.safe-routing-result-grid { display: grid; grid-template-columns: minmax(0,1.08fr) minmax(260px,.92fr); gap: 12px; margin-top: 12px; }
+.safe-routing-result-card > .section-heading, .safe-routing-why-card > .section-heading { margin-bottom: 10px; }
+.safe-routing-result__banner { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 10px; border: 1px solid rgba(114,196,154,.22); border-radius: 3px; background: rgba(114,196,154,.04); }
+.safe-routing-result__banner > span { display: inline-flex; align-items: center; gap: 7px; color: #a3dbb8; font-size: 9px; font-weight: 700; letter-spacing: .08em; }
+.safe-routing-result__facts { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; margin-top: 8px; }
+.safe-routing-result__facts > div { display: flex; min-width: 0; flex-direction: column; gap: 5px; padding: 8px; border-bottom: 1px solid var(--line-soft); }
+.safe-routing-result__facts > div > span { color: #778a91; font-size: 6px; font-weight: 700; letter-spacing: .11em; }
+.safe-routing-result__facts > div > strong { overflow-wrap: anywhere; color: #d9e4e5; font-family: var(--font-display); font-size: 10px; font-weight: 600; }
+.safe-routing-result__facts > div > .safe-routing-result__low { color: #88d0a2; }
+.safe-routing-result__recommendation { display: flex; flex-direction: column; gap: 4px; margin-top: 9px; padding: 9px 10px; border-left: 2px solid var(--green); background: rgba(114,196,154,.045); }
+.safe-routing-result__recommendation > strong { color: #a4d6b5; font-family: var(--font-display); font-size: 10px; }
+.safe-routing-result__recommendation > small { color: #7f9990; font-size: 7px; }
+.safe-routing-pending, .safe-routing-no-route { display: flex; align-items: center; gap: 10px; min-height: 132px; padding: 13px; border: 1px solid var(--line-soft); border-radius: 4px; background: rgba(255,255,255,.012); }
+.safe-routing-pending > svg { flex: 0 0 auto; color: var(--cyan); }
+.safe-routing-pending > span, .safe-routing-no-route > div { display: flex; flex-direction: column; gap: 5px; }
+.safe-routing-pending strong, .safe-routing-no-route strong { color: #d8e5e6; font-size: 9px; }
+.safe-routing-pending small, .safe-routing-no-route span, .safe-routing-no-route small { color: #82959b; font-size: 8px; line-height: 1.45; }
+.safe-routing-no-route { border-color: rgba(242,184,94,.25); background: rgba(242,184,94,.03); }
+.safe-routing-no-route > svg { flex: 0 0 auto; color: var(--amber); }
+.safe-routing-why-card > p { margin: 0; padding: 10px 11px; border-left: 2px solid var(--cyan); background: rgba(83,199,220,.035); color: #b5c6c9; font-size: 9px; line-height: 1.55; }
+.safe-routing-why-card__proof { display: flex; align-items: center; gap: 7px; margin-top: 9px; color: #88bea0; font-size: 8px; }
+.safe-routing-why-card__proof svg { flex: 0 0 auto; color: var(--green); }
+.safe-routing-status-list { display: flex; flex-direction: column; gap: 0; margin-top: 10px; border-top: 1px solid var(--line-soft); }
+.safe-routing-status-list > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 31px; border-bottom: 1px solid rgba(136,168,185,.08); }
+.safe-routing-status-list > div > span { color: #748891; font-size: 6px; font-weight: 700; letter-spacing: .1em; }
+.safe-routing-status-list > div > strong { color: #c8d7d8; font-size: 8px; }
+.safe-routing-comparison-grid { display: grid; grid-template-columns: minmax(0,1.12fr) minmax(280px,.88fr); gap: 12px; margin-top: 12px; }
+.safe-routing-comparison-card .section-heading { align-items: center; }
+.safe-routing-comparison-hint { color: #6f8790; font-size: 6px; font-weight: 700; letter-spacing: .07em; }
+.safe-routing-road-list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.safe-routing-road-row { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 9px 10px; border: 1px solid var(--line-soft); border-left: 2px solid #647982; border-radius: 3px; background: rgba(255,255,255,.012); text-align: left; transition: background .15s ease,border-color .15s ease; }
+.safe-routing-road-row:hover, .safe-routing-road-row.is-selected { background: rgba(255,255,255,.03); }
+.safe-routing-road-row--unsafe { border-left-color: var(--red); }
+.safe-routing-road-row--high-risk { border-left-color: var(--amber); }
+.safe-routing-road-row--safe { border-left-color: var(--green); }
+.safe-routing-road-row.is-recommended { border-color: rgba(114,196,154,.3); border-left-color: var(--green); background: rgba(114,196,154,.035); }
+.safe-routing-road-row__heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.safe-routing-road-row__heading > strong { color: #e0e9e9; font-family: var(--font-display); font-size: 10px; }
+.safe-routing-road-row__decision { display: inline-flex; align-items: center; gap: 4px; color: #91a2a5; font-size: 6px; font-weight: 700; letter-spacing: .09em; }
+.safe-routing-road-row__decision--rejected { color: #e7847b; }
+.safe-routing-road-row__decision--avoid, .safe-routing-road-row__decision--safe-candidate { color: #dabb77; }
+.safe-routing-road-row__decision--recommended, .safe-routing-road-row__decision--safe-alternative { color: #84c99e; }
+.safe-routing-road-row__metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 5px; color: #b5c4c6; font-size: 7px; font-weight: 600; }
+.safe-routing-road-row__metrics > span { white-space: nowrap; }
+.safe-routing-road-row__reason { color: #82969b; font-size: 7px; line-height: 1.35; }
+.safe-routing-empty-inline { padding: 16px; color: #84979e; font-size: 8px; text-align: center; }
+.safe-routing-shelter-list { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; margin-top: 10px; }
+.safe-routing-shelter { display: flex; min-width: 0; flex-direction: column; gap: 8px; padding: 9px; border: 1px solid var(--line-soft); border-radius: 4px; background: rgba(255,255,255,.01); }
+.safe-routing-shelter.is-recommended { border-color: rgba(114,196,154,.3); background: rgba(114,196,154,.035); box-shadow: inset 0 1px 0 rgba(114,196,154,.1); }
+.safe-routing-shelter__top { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+.safe-routing-shelter__icon { display: grid; width: 22px; height: 22px; flex: 0 0 auto; place-items: center; border: 1px solid rgba(114,196,154,.22); border-radius: 3px; background: rgba(114,196,154,.055); color: #8bcda4; }
+.safe-routing-shelter__top > strong { color: #d7e2e2; font-size: 8px; }
+.safe-routing-shelter__top .status-badge { min-height: 17px; margin-left: auto; padding: 2px 4px; font-size: 5px; }
+.safe-routing-shelter__metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.safe-routing-shelter__metrics > span { display: flex; flex-direction: column; gap: 3px; }
+.safe-routing-shelter__metrics strong { color: #d7e3e3; font-family: var(--font-display); font-size: 10px; }
+.safe-routing-shelter__metrics small, .safe-routing-shelter__access > span { color: #71868d; font-size: 5px; font-weight: 700; letter-spacing: .1em; }
+.safe-routing-shelter__access { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.safe-routing-shelter__access .status-badge { min-height: 17px; padding: 2px 5px; font-size: 5px; }
+.safe-routing-shelter__reason { color: #82b496; font-size: 6px; line-height: 1.4; }
+.safe-routing-road-detail { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 9px 11px; border: 1px solid rgba(83,199,220,.16); border-radius: 4px; background: rgba(83,199,220,.025); }
+.safe-routing-road-detail__icon { display: grid; width: 27px; height: 27px; flex: 0 0 auto; place-items: center; border: 1px solid rgba(83,199,220,.2); border-radius: 4px; color: var(--cyan); }
+.safe-routing-road-detail > div { display: flex; flex: 1; flex-direction: column; gap: 3px; min-width: 0; }
+.safe-routing-road-detail > div > strong { overflow: hidden; color: #d3e0e1; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.safe-routing-road-detail > div > small { overflow: hidden; color: #7f949a; font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
+.safe-routing-road-detail__metrics { color: #92adb2; font-size: 7px; white-space: nowrap; }
+.safe-routing-footer { margin-top: 13px; }
+
+@media (max-width: 1120px) {
+  .safe-routing-main-grid { grid-template-columns: minmax(0,1fr); }
+  .safe-routing-result-grid, .safe-routing-comparison-grid { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 760px) {
+  .safe-routing-heading { align-items: flex-start; }
+  .safe-routing-heading .page-heading__actions { align-items: flex-start; }
+  .safe-routing-incident-bar { align-items: flex-start; flex-direction: column; }
+  .safe-routing-incident-bar__status { flex-wrap: wrap; }
+  .safe-routing-card-heading { align-items: flex-start; flex-direction: column; }
+  .safe-routing-card-heading > .status-badge { align-self: flex-start; }
+  .safe-routing-result__facts { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .safe-routing-shelter-list { grid-template-columns: minmax(0,1fr); }
+  .safe-routing-prerequisite { align-items: flex-start; flex-wrap: wrap; }
+  .safe-routing-prerequisite > span { flex-basis: calc(100% - 30px); }
+  .safe-routing-prerequisite > .button { margin-left: 24px; }
+  .safe-routing-comparison-hint { line-height: 1.4; }
+  .safe-route-map__toolbar { left: 8px; right: auto; }
+  .safe-route-map__toolbar span { font-size: 5px; }
+  .safe-route-map__selected { right: 7px; bottom: 30px; width: min(228px,calc(100% - 14px)); }
+  .safe-routing-road-detail { flex-wrap: wrap; }
+  .safe-routing-road-detail__metrics { margin-left: 36px; }
+}
+@media (max-width: 520px) {
+  .safe-routing-heading__support { max-width: 330px; }
+  .safe-routing-note { font-size: 7px; }
+  .safe-route-map { min-height: 190px; }
+  .safe-route-map__district { font-size: 9px; }
+  .safe-route-map__map-note { font-size: 6px; }
+  .safe-route-map__road { stroke-width: 8; }
+  .safe-route-map__road.is-recommended { stroke-width: 10; }
+  .safe-route-map__road-label { font-size: 9px; }
+  .safe-route-map__shelter text { font-size: 8px; }
+  .safe-routing-result__banner { align-items: flex-start; flex-direction: column; }
+  .safe-routing-road-row__metrics { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px 10px; }
+  .safe-routing-empty > div { width: 100%; flex-direction: column; }
+  .safe-routing-empty > div .button { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .safe-route-map__road, .safe-route-map__selected, .safe-routing-steps { transition: none; animation: none; }
+}

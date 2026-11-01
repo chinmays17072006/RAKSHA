@@ -222,3 +222,72 @@ After completing Phase 1, stop and provide: (1) what was implemented; (2) what i
 - Browser checks passed: the sequential Citizen SOS demo created #1043; the four-step analysis produced CRITICAL/P0, 94% confidence, IMMEDIATE RESCUE, and the exact six-event timeline; the existing Command Center reflected the same #1043 record and its critical map marker; the triage notification appeared; #1042 remained Critical/P0/Awaiting Rescue; #1041 analyzed as High/P1 and displayed a matching non-rescue recommendation/timeline. The browser console had no output. The deterministic engine tests include incomplete-information manual review; the manual-review result now also updates the same record's timeline without changing severity or priority.
 - `pnpm check` passed; `pnpm test` passed (10 tests across 3 files); `pnpm build:static` passed. `/`, `/citizen-sos`, `/ai-triage`, `/raksha-mark.svg`, and `/manus-routes.json` returned HTTP 200; the route manifest matches the three implemented pages. Desktop, tablet, and mobile AI Triage layouts were visually checked; no horizontal overflow was observed.
 - Known limitations: incident state is in-memory and resets on a fresh page load. The Phase 3 selector defaults to #1043 when it exists; in a fresh session, submit the Citizen SOS demo first, and the empty state guides the operator to do so. The rule engine is deterministic local demo logic, not a live AI service; no real dispatch, GPS, backend persistence, or Phase 4 routing is connected. Vite retains the non-blocking warning for the platform's classic dynamic-config script.
+
+## Phase 4 — Safe Evacuation Routing — Complete
+
+### 37. Preserve the existing application and limit scope — Complete
+- Continue working on the existing RAKSHA project. Phases 1–3 are complete. Do NOT rebuild the application, redesign existing pages, or rewrite working Phase 1, Phase 2, or Phase 3 functionality.
+- Implement ONLY PHASE 4 — SAFE EVACUATION ROUTING. Do NOT implement Phase 5 Rescue Operations, Phase 6 Shelters, Phase 7 Offline, Phase 8 Demo Mode, rescue dispatch, a full Shelters & Resources page, or later phases.
+- Current remaining budget is approximately 1,163 credits. Be extremely conservative: do not add paid/external APIs, Google Maps, Mapbox, a large backend, authentication, unnecessary dependencies, complex real-world navigation, or unrelated features. Use local simulated data and focus on the judge-facing demonstration.
+
+### 38. Safe Routing page and navigation — Complete
+- Activate the existing ROUTING navigation item, or add SAFE ROUTING to the existing sidebar without redesigning the sidebar.
+- Page title: SAFE EVACUATION ROUTING. Subtitle: DISASTER-AWARE ROUTE INTELLIGENCE. Supporting text: “Find the safest available route while accounting for blocked roads and disaster risk.”
+- Use the existing RAKSHA shell and dark command-center design; do not redesign existing pages.
+
+### 39. Central Incident #1043 and route analysis — Complete
+- Use the SAME centralized Incident #1043 object; do not create a duplicate. Incident #1043 is Flash Flood; Sector 04; 4 people; 1 elderly person; current AI status CRITICAL / P0; recommended action IMMEDIATE RESCUE.
+- Provide the prominent ANALYZE SAFE ROUTES action. When clicked, show a short ordered sequence: ANALYZING ROAD CONDITIONS → CHECKING FLOOD RISK → EVALUATING SHELTER ACCESS → CALCULATING SAFE ROUTE → ROUTE SELECTED.
+- Use a lightweight deterministic local routing engine. Do not integrate Google Maps, other paid routing APIs, or a real-world navigation backend. Route choice must evaluate SAFETY + ROAD CONDITION + FLOOD RISK + DISTANCE + ETA; do not simply choose the shortest route.
+
+### 40. Central simulated roads and exact data — Complete
+- Use the same centralized store and its roads; do not create a separate routing data system. The routing engine reads the selected Incident, Roads, and Shelters, then updates that incident's route recommendation.
+- Each road has a name, status, distance, estimated time, flood risk, safety score, and reason.
+- ROAD A: status BLOCKED; distance 4.8 km; ETA 9 min; flood risk CRITICAL; safety UNSAFE; reason “Road submerged by floodwater.”
+- ROAD B: status OPEN; distance 5.4 km; ETA 10 min; flood risk HIGH; safety HIGH RISK; reason “Water level rising near eastern section.”
+- ROAD C: status OPEN; distance 6.2 km; ETA 11 min; flood risk LOW; safety SAFE; reason “Clear access with low flood exposure.”
+
+### 41. Judge-facing route comparison and recommendation — Complete
+- Select ROAD C, even though it is not the shortest route. Show ROAD A / BLOCKED / 4.8 km / 9 min / CRITICAL RISK / REJECTED; ROAD B / OPEN / 5.4 km / 10 min / HIGH RISK / AVOID; ROAD C / OPEN / 6.2 km / 11 min / LOW RISK / RECOMMENDED.
+- Show RECOMMENDED ROUTE: Road C; 6.2 km; 11 min; LOW RISK; destination SHELTER 07.
+- Show the exact concise explanation: “Road C provides the safest available access to Shelter 07 while avoiding the blocked and high-risk flood corridors.”
+- The comparison is central to the judge demonstration: make clear RAKSHA prioritizes safety over shortest distance.
+
+### 42. Simulated route map and road interaction — Complete
+- Build a lightweight simulated map without external map APIs. Show Sector 04, Incident #1043, Road A, Road B, Road C, and Shelter 07.
+- Visually distinguish the blocked road, high-risk road, safe road, and highlighted recommended route. Clicking Road A, B, or C shows its current condition and reason.
+
+### 43. Local shelter comparison and recommendation — Complete
+- Use the centralized shelter data and show these demo values: SHELTER 01 — capacity 82%, distance 4.2 km, access HIGHER RISK; SHELTER 07 — capacity 32%, distance 6.2 km, access SAFE; SHELTER 12 — capacity 91%, distance 3.8 km, access HIGH RISK.
+- Recommend SHELTER 07 with the exact reason: “Lower occupancy and safer access through Road C.”
+- Do NOT build the full Shelters & Resources page; that is Phase 6.
+
+### 44. Safe route result and status panel — Complete
+- After analysis show SAFE ROUTE FOUND; FROM Sector 04; TO Shelter 07; ROUTE Road C; DISTANCE 6.2 km; ETA 11 min; RISK LOW; ROAD CONDITION OPEN; SHELTER CAPACITY 32%; RECOMMENDATION SAFE EVACUATION ROUTE.
+- Show route-status fields: ROUTE ANALYSIS COMPLETE; ROAD CONDITIONS ASSESSED; SAFE ROUTE FOUND; SHELTER 07.
+
+### 45. Central Incident #1043 and Command Center integration — Complete
+- Update the SAME Incident #1043 object with `recommendedRoute: Road C`, `destinationShelter: Shelter 07`, `routeDistance: 6.2 km`, `routeEta: 11 min`, and `routeRisk: LOW`. Do not change its AI priority; it remains CRITICAL / P0.
+- The Command Center must show that a safe route has been generated for #1043. Inside Incident #1043 details add a compact EVACUATION ROUTE section: Road C → Shelter 07; 6.2 km; 11 min; LOW RISK. Do not redesign the entire Command Center.
+
+### 46. Routing explanation and no-safe-route fallback — Complete
+- Show WHY THIS ROUTE? and the exact explanation: “Road A is blocked by floodwater. Road B remains open but has high flood risk. Road C provides the safest available access to Shelter 07.” Do not expose hidden reasoning.
+- Include the simple no-safe-route prototype state. If all routes are unsafe, show NO SAFE ROUTE AVAILABLE and MANUAL OPERATOR REVIEW REQUIRED. Do not implement complex emergency fallback logic.
+
+### 47. Responsive visual system and future architecture — Complete
+- Desktop is the main hackathon presentation target; tablet and mobile must also work, with no horizontal overflow and a readable route comparison on small screens.
+- Preserve RAKSHA styling: dark command-center background; blue/cyan route intelligence; red blocked roads; amber high-risk roads; green safe/recommended route. Keep the design professional.
+- Do NOT add excessive gradients, excessive glassmorphism, huge cards, cartoon maps, unnecessary animations, or external map dependencies.
+- Preserve the future flow SOS → AI Triage → Safe Route → Rescue Team → Shelter using the same centralized incident store.
+
+### 48. Phase 4 acceptance and handoff — Complete
+- Verify: Safe Routing page opens; Incident #1043 is available and shows CRITICAL/P0; Analyze Safe Routes works; Road A is BLOCKED; Road B is HIGH RISK; Road C is SAFE; Road C is recommended; Shelter 07 is recommended; distance is 6.2 km; ETA is 11 min; risk is LOW; route explanation appears; Incident #1043 is updated; Command Center reflects the route; AI Triage works; Citizen SOS works; existing Command Center works; TypeScript/build pass; no blocking console errors; responsive layout works.
+- Final demonstration: CRITICAL INCIDENT #1043 → ROUTE ANALYSIS → ROAD A BLOCKED → ROAD B HIGH RISK → ROAD C SAFE → ROAD C SELECTED → SHELTER 07 → 6.2 KM / 11 MIN / LOW RISK.
+- STOP AFTER PHASE 4. Do NOT implement Phase 5 Rescue Operations, Phase 6 Shelters, Phase 7 Offline, or Phase 8 Demo Mode. Prioritize functionality over additional visual features.
+
+## Phase 4 verification record — Complete
+- Browser end-to-end demo: fictional Citizen SOS created the shared #1043 record; local AI Triage produced CRITICAL / P0; Safe Routing chose Road C → Shelter 07 at 6.2 km / 11 min / LOW RISK; the Command Center incident detail reflected that same route.
+- The route-result screen displayed the required comparison, exact route and shelter explanations, result/status fields, and simulated map; the deterministic no-safe-route and input-immutability tests passed.
+- Responsive check: a 390 px route shell measured document/body width 390 px with no horizontal overflow. The route page CSS stacks the map/result comparisons at tablet widths and the shelter cards at mobile widths.
+- Validation passed: `pnpm check`; `pnpm test` (15 tests across 4 files); `pnpm build`. `/safe-routing` and `/manus-routes.json` returned HTTP 200, and the manifest contains all four declared page routes. No application runtime error was observed in the completed end-to-end flow.
+- Known non-blocking build warnings remain from the starter's classic `/api/platform/config.js` script and Vite's >500 kB bundle notice. Operational data remains local/in-memory; no live navigation, dispatch, or backend persistence is connected.
