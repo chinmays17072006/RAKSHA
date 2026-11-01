@@ -1,4 +1,4 @@
-import { Route, Switch } from "wouter";
+import { Route, Router as WouterRouter, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ToastProvider } from "./components/system/feedback";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -13,20 +13,24 @@ import DemoModePage from "./features/demo-mode/DemoModePage";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 
+const routerBase = import.meta.env.BASE_URL.replace(/\/$/, "");
+
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/citizen-sos" component={CitizenSOSPage} />
-      <Route path="/ai-triage" component={AITriagePage} />
-      <Route path="/safe-routing" component={SafeRoutingPage} />
-      <Route path="/rescue-operations" component={RescueOperationsPage} />
-      <Route path="/shelters-resources" component={SheltersResourcesPage} />
-      <Route path="/offline-mode" component={OfflineModePage} />
-      <Route path="/demo" component={DemoModePage} />
-      <Route path="/404" component={NotFound} />
-      <Route component={NotFound} />
-    </Switch>
+    <WouterRouter base={routerBase}>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/citizen-sos" component={CitizenSOSPage} />
+        <Route path="/ai-triage" component={AITriagePage} />
+        <Route path="/safe-routing" component={SafeRoutingPage} />
+        <Route path="/rescue-operations" component={RescueOperationsPage} />
+        <Route path="/shelters-resources" component={SheltersResourcesPage} />
+        <Route path="/offline-mode" component={OfflineModePage} />
+        <Route path="/demo" component={DemoModePage} />
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </WouterRouter>
   );
 }
 
