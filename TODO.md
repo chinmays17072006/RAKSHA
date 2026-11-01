@@ -378,3 +378,73 @@ After completing Phase 1, stop and provide: (1) what was implemented; (2) what i
 - Responsive verification: full post-dispatch flow at 390px showed no horizontal overflow. The no-incident state at 390px, 768px, and 1024px also showed no overflow and did not incorrectly show the no-team warning.
 - Regression checks: existing Citizen SOS, AI Triage, Safe Routing, Command Center navigation, Team Bravo details, and Incident #1042 remained usable. Browser inspection found no blocking application console errors.
 - All response, route, and team data are simulated and local. No live emergency service or external team dispatch is connected.
+
+
+## Phase 6 — Shelters & Resources — Complete
+
+### 64. Preserve the RAKSHA project and implement Phase 6 only — Complete
+- Continue working on the existing RAKSHA application. Phases 0–5 are already working. Implement ONLY Phase 6: Shelters & Resources, then STOP immediately. Do NOT start Phase 7.
+- Do NOT rebuild or redesign the application; refactor unrelated code; modify completed functionality unless required for integration; install unnecessary packages; create a backend or database; use external APIs or live maps; add live GPS, unnecessary animations, broad visual polish, or unrelated changes.
+- Reuse the existing RAKSHA shell, sidebar, top bar, components, centralized state, data models, styling, responsive system, Incident #1043, Command Center, routing, and Rescue Operations. Use the minimum possible code for the stated remaining budget of 655 Manus credits.
+
+### 65. Preserve the existing Incident #1043 route and rescue response — Complete
+- Do NOT create duplicate Incident #1043 data. Keep the same centralized incident used by Citizen SOS, AI Triage, Safe Routing, Rescue Operations, and Command Center.
+- Preserve its route: ROAD C → SHELTER 07; distance 6.2 km; ETA 11 min; risk LOW.
+- Preserve the Team Bravo rescue response: after dispatch its status remains EN ROUTE; ETA 11 min; capacity 6; medical support YES. Phase 6 must not overwrite or clear route, triage, dispatch, or timeline state.
+
+### 66. Display the three existing shelters and deterministic occupancy bands — Complete
+- Reuse the three existing centralized demo shelter records; do not create duplicate shelters.
+- SHELTER 01: 82% occupancy; status AVAILABLE; access risk HIGHER; distance from Incident #1043 is 4.2 km. The deterministic occupancy band is LIMITED at 82%; retain the existing open/available intake status separately from that occupancy band if both are shown.
+- SHELTER 07: 32% occupancy; status AVAILABLE; access risk LOW; distance from Incident #1043 is 6.2 km; RECOMMENDED.
+- SHELTER 12: 91% occupancy; status NEAR CAPACITY; access risk HIGH; distance from Incident #1043 is 3.8 km.
+- Use simple deterministic occupancy rules: below 80% → AVAILABLE; 80–90% → LIMITED; above 90% → NEAR CAPACITY. For the demo: Shelter 01 at 82% → LIMITED; Shelter 07 at 32% → AVAILABLE; Shelter 12 at 91% → NEAR CAPACITY.
+
+### 67. Recommend Shelter 07 with the requested reason — Complete
+- Make SHELTER 07 the clear operational recommendation and show: 32% OCCUPIED; LOW-RISK ACCESS; 6.2 KM; a clear RECOMMENDED indicator.
+- Show the exact reason: “Shelter 07 is recommended because it has lower occupancy and the safest available route from Incident #1043.”
+- Use deterministic local demo logic only; do NOT use external AI.
+
+### 68. Show Shelter 07 resources and the operation resource summary — Complete
+- For SHELTER 07 show a compact resource summary: Food — AVAILABLE; Water — AVAILABLE; Medical support — AVAILABLE; Emergency capacity — AVAILABLE. Simple status indicators are sufficient; do not build a complex resource-management system.
+- Add the DEMO resource overview with: RESCUE TEAMS — Team Bravo, EN ROUTE; MEDICAL — Available; FOOD — Available; WATER — Available; SHELTER CAPACITY — Shelter 07, 32% occupied.
+- Reuse existing resource records/types and derive availability from existing centralized state where it is represented; add only the smallest missing shelter-level demo detail if required.
+- Do NOT connect to real emergency services.
+
+### 69. Connect the resource page to the same incident and safe route — Complete
+- Show ACTIVE INCIDENT: #1043 — FLASH FLOOD; Sector 04; CRITICAL / P0.
+- Show recommended destination SHELTER 07 and route ROAD C; 6.2 km; 11 min; LOW RISK.
+- Do NOT create another incident record. Use the same centralized incident state. The most important requirement is that the existing route and rescue state remain unchanged.
+
+### 70. Keep Command Center integration minimal — Complete
+- If the existing centralized state supports it with minimal changes, the Command Center may show Incident #1043; Destination: Shelter 07; Shelter occupancy: 32%.
+- Do NOT perform a large Command Center rewrite. If this information already exists through the shared incident state, simply expose it.
+- The optional shelter occupancy card was not added to the Command Center; Phase 6 shows destination and occupancy on the Shelters & Resources page, while the existing Command Center continues to show the shared dispatch summary.
+
+### 71. Activate the existing navigation item and preserve RAKSHA design/responsiveness — Complete
+- Activate the existing Shelters & Resources navigation page and use the existing RAKSHA shell. Do not create a new layout system.
+- Use the existing dark emergency command-center interface; compact information panels; white/off-white typography; blue/cyan operational indicators; green for safe/available; amber for limited/warning; red for critical/near capacity. Visually emphasize Shelter 07 because it is recommended.
+- Do NOT add huge cards, excessive gradients or rounded corners, rainbow colors, decorative illustrations, unnecessary animations, or generic Bootstrap styling.
+- Verify desktop, tablet, and 390px mobile with NO HORIZONTAL OVERFLOW. Reuse the existing responsive CSS; do not rewrite the responsive system.
+
+### 72. Phase 6 acceptance, regression protection, and technical quality — Complete
+- Verify: 1. Shelters & Resources page loads. 2. Shelter 01 appears. 3. Shelter 07 appears. 4. Shelter 12 appears. 5. Shelter 07 is marked RECOMMENDED. 6. Shelter 07 shows 32% occupancy. 7. Shelter 07 shows LOW-RISK access. 8. Shelter 07 shows 6.2 km. 9. Shelter 01 shows 82%. 10. Shelter 12 shows 91%. 11. Resource summary appears. 12. Incident #1043 is correctly connected. 13. Road C remains the selected route. 14. Team Bravo remains EN ROUTE after dispatch. 15. Existing Command Center still works. 16. Existing Rescue Operations still works. 17. Existing Safe Routing still works. 18. Existing AI Triage still works. 19. TypeScript check passes. 20. Production build passes. 21. No blocking browser console errors. 22. 390px layout has no horizontal overflow.
+
+### 73. Conserve credits, stop after Phase 6, and provide the requested handoff — Complete
+- Only 655 credits remain. Use the smallest implementation possible. Do NOT rebuild existing pages, rewrite architecture, install dependencies, create backend services or a database, add authentication or external APIs, add live maps or real GPS, add advanced resource algorithms, redesign the Command Center or entire application, or modify unrelated files. Reuse existing components and data; if a component already exists, reuse it; if a shelter type already exists, extend it minimally; if resource data already exists, reuse it; do not duplicate state.
+- After Phase 6 is implemented and tested, STOP. Do NOT begin Phase 7, add optional features, perform broad polish, or consume credits on unrelated improvements.
+- The final report must include: 1) what was implemented; 2) files changed; 3) tests performed; 4) test results; 5) browser validation; 6) errors/warnings; 7) known limitations; 8) Git commit hash; 9) confirmation that the worktree is clean; 10) current remaining Manus credits.
+- Final demo story: SOS → AI TRIAGE → CRITICAL/P0 → ROAD C → SHELTER 07 → TEAM BRAVO → DISPATCHED → SHELTER 07 RESOURCES AVAILABLE. STOP AFTER PHASE 6.
+
+## Phase 6 verification record — Complete
+
+- `pnpm check`: passed with no TypeScript errors.
+- `pnpm test`: passed; 7 test files and 27 tests, including 5 shelter occupancy/recommendation tests.
+- `pnpm build`: passed. Non-blocking notices remain for `/api/platform/config.js` being an unbundled classic script and the existing >500 kB JavaScript chunk.
+- `git diff --check`: passed. `/shelters-resources` and `/manus-routes.json` returned HTTP 200; the manifest includes all six registered page routes.
+- Browser end-to-end: fictional SOS → Incident #1043 → local AI Triage CRITICAL/P0 → Road C → Shelter 07 → Team Bravo dispatched → Shelters & Resources. The page preserved the same incident, route, and Team Bravo EN ROUTE / ETA 11 min state.
+- Browser verification showed Shelter 01 at 82% with AVAILABLE operational status and LIMITED capacity band; Shelter 07 at 32% with LOW access risk, 6.2 km, and the exact recommendation reason; Shelter 12 at 91% with NEAR CAPACITY. The resource summary reflected the shared local demo resource records.
+- Command Center spot-check showed Incident #1043 as RESCUE DISPATCHED · TEAM BRAVO · ETA 11 MIN; existing Incident #1042 remained present. Rescue Operations, Safe Routing, AI Triage, and the existing navigation remained usable.
+- Responsive verification: complete post-dispatch shelter page at 390px had 0px horizontal overflow (document width 375px in a 390px viewport); the page also had no overflow at 768px and 1024px.
+- Browser console inspection showed no blocking application runtime errors.
+- Known limitation: food, water, and medical availability are district-level simulated stock, not shelter-allocated inventory; no live logistics or emergency-service integration is connected.
+- Credit note: the user-provided starting estimate was 655; a live remaining-credit balance was not available in the project environment.

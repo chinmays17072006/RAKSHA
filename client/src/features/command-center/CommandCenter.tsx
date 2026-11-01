@@ -48,13 +48,13 @@ import {
   type DataColumn,
 } from "@/components/system/ui";
 
-export type OperationsPage = "command" | "citizen-sos" | "ai-triage" | "safe-routing" | "rescue-operations";
+export type OperationsPage = "command" | "citizen-sos" | "ai-triage" | "safe-routing" | "rescue-operations" | "shelters-resources";
 
 const navigation = [
   { label: "Command Center", icon: LayoutDashboard, route: "/", activePage: "command" },
   { label: "Live Incidents", icon: Radio, phase: "NEXT" },
   { label: "Rescue Operations", icon: Truck, route: "/rescue-operations", activePage: "rescue-operations" },
-  { label: "Shelters & Resources", icon: Building2, phase: "NEXT" },
+  { label: "Shelters & Resources", icon: Building2, route: "/shelters-resources", activePage: "shelters-resources" },
   { label: "Citizen SOS", icon: LifeBuoy, route: "/citizen-sos", activePage: "citizen-sos" },
   { label: "AI Triage", icon: BrainCircuit, route: "/ai-triage", activePage: "ai-triage" },
   { label: "Safe Routing", icon: RouteIcon, route: "/safe-routing", activePage: "safe-routing" },
@@ -144,7 +144,7 @@ export function NavigationRail({
           <div><strong>SYSTEM {systemStatus.system.toUpperCase()}</strong><span>Network {systemStatus.network.toLowerCase()} · sync {systemStatus.dataSync.toLowerCase()}</span></div>
           <CheckCircle2 size={15} aria-hidden="true" />
         </div>
-        <div className="sidebar__version">RAKSHA <span>•</span> {activePage === "command" ? "COMMAND CENTER · PHASE 1" : activePage === "citizen-sos" ? "CITIZEN SOS · PHASE 2" : activePage === "ai-triage" ? "AI TRIAGE · PHASE 3" : activePage === "safe-routing" ? "SAFE ROUTING · PHASE 4" : "RESCUE OPERATIONS · PHASE 5"}</div>
+        <div className="sidebar__version">RAKSHA <span>•</span> {activePage === "command" ? "COMMAND CENTER · PHASE 1" : activePage === "citizen-sos" ? "CITIZEN SOS · PHASE 2" : activePage === "ai-triage" ? "AI TRIAGE · PHASE 3" : activePage === "safe-routing" ? "SAFE ROUTING · PHASE 4" : activePage === "rescue-operations" ? "RESCUE OPERATIONS · PHASE 5" : "SHELTERS & RESOURCES · PHASE 6"}</div>
       </aside>
     </>
   );
