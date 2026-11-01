@@ -448,3 +448,48 @@ After completing Phase 1, stop and provide: (1) what was implemented; (2) what i
 - Browser console inspection showed no blocking application runtime errors.
 - Known limitation: food, water, and medical availability are district-level simulated stock, not shelter-allocated inventory; no live logistics or emergency-service integration is connected.
 - Credit note: the user-provided starting estimate was 655; a live remaining-credit balance was not available in the project environment.
+
+
+## Phase 7 — Offline Resilience — Complete
+
+### 74. Preserve the existing RAKSHA application and implement Phase 7 only — Complete
+- Continue the current RAKSHA prototype. Phases 0–6 must keep working; do not break existing functionality. Implement ONLY Phase 7: a lightweight Offline Resilience page. Stop after Phase 7; do not start Phase 8.
+- Extreme credit conservation: the user reports 458 credits remaining. Make the smallest possible targeted edits. Do not rebuild or redesign the app; modify completed features only as necessary for integration; do not install unnecessary packages, create a backend/database, add external APIs/cloud services, implement production-grade offline infrastructure, add live networking services, authentication, real emergency communications, or modify unrelated features.
+- Reuse existing app shell, navigation, centralized state, data, styles, responsive layout, and components. No IndexedDB or new service worker. Use the simplest available local mechanism, in order: existing centralized state, localStorage if necessary, or simple in-memory state.
+
+### 75. Activate Offline Mode and demonstrate network status and controls — Complete
+- Activate the existing Offline Mode navigation item and use the existing RAKSHA shell; do not create a new dashboard layout.
+- Initial network status is NETWORK CONNECTED / CONNECTED (green). Clicking SIMULATE NETWORK FAILURE changes to OFFLINE MODE and shows NETWORK CONNECTION LOST. The status is OFFLINE (red/amber).
+- Provide only these three functional controls: SIMULATE NETWORK FAILURE; CREATE OFFLINE SOS; RESTORE NETWORK. No unnecessary controls.
+- Clicking RESTORE NETWORK changes OFFLINE → CONNECTED and shows NETWORK RESTORED. Keep network state visible in the shared operations shell where this requires only minimal central-state integration.
+
+### 76. Create and display the local simulated offline SOS queue — Complete
+- While offline, CREATE OFFLINE SOS creates one demo emergency request locally and does not send it to a real service: Incident #1044; Flash Flood; Sector 05; 3 people; priority PENDING TRIAGE; status QUEUED OFFLINE.
+- Show an OFFLINE QUEUE containing #1044 — SOS, Flash Flood, Sector 05, 3 people, and status WAITING FOR SYNC while offline. Show a timestamp only if the existing system supports timestamps.
+- Clearly label this as local/simulated; do not claim real satellite communication, real emergency networking, guaranteed offline delivery, disaster communication infrastructure, or live emergency-service integration.
+
+### 77. Restore connectivity and visibly complete simulated synchronization — Complete
+- After RESTORE NETWORK, show the sequence CONNECTED → OFFLINE QUEUE → NETWORK RESTORED → SYNCING → SYNC COMPLETE using simple visual indicators.
+- Show the exact status SYNCING OFFLINE DATA... while synchronization is active. Complete the simulated synchronization, update #1044 to SYNCED, and show OFFLINE SOS SYNCHRONIZED.
+- After synchronization, put #1044 in the same centralized operations state if this can be done with minimal changes. Do not create a second independent application state. If central integration would require major architecture change, keep the offline queue local and mark it as a demo simulation. Do not modify or clear existing Incident #1043, its Road C route, Team Bravo dispatch, or Phase 6 shelter state.
+
+### 78. Preserve the RAKSHA visual identity and responsive behavior — Complete
+- Match the existing dark emergency operations theme, compact panels, white/off-white text, green for connected, red/amber for offline, and cyan/blue for synchronization. Reuse Lucide icons already used in the app.
+- Do not redesign existing pages, add large gradients, excessive animations, decorative graphics, broad polish, or unrelated features. Reuse existing responsive styles.
+- Verify desktop, tablet, and 390px mobile; there must be no horizontal overflow.
+
+### 79. Phase 7 acceptance, regression protection, and stop/handoff — Complete
+- Verify the complete sequence: Offline Mode page loads; initial CONNECTED; simulated network failure works; OFFLINE status and NETWORK CONNECTION LOST appear; offline SOS creation works; #1044 appears as QUEUED OFFLINE / WAITING FOR SYNC with the specified data; RESTORE NETWORK works; status becomes CONNECTED and NETWORK RESTORED appears; sync sequence and SYNCING OFFLINE DATA... are visible; #1044 becomes SYNCED; OFFLINE SOS SYNCHRONIZED appears.
+- Verify Incident #1043 remains unchanged; its Road C route remains unchanged; Team Bravo dispatch remains unchanged; Shelters & Resources remains unchanged; Citizen SOS, AI Triage, and Command Center still work.
+- TypeScript check and production build pass; no blocking browser console errors; 390px has no horizontal overflow.
+- After implementation and testing, STOP. Do not start Phase 8, add optional features, polish, or refactor unrelated code.
+- Final report: what was implemented; files changed; tests and results; browser validation; errors/warnings; known limitations; Git commit hash; worktree status; remaining Manus credits. Final demo: CONNECTED → NETWORK FAILURE → OFFLINE MODE → OFFLINE SOS #1044 → QUEUED → NETWORK RESTORED → SYNCING → SYNCED.
+
+### Phase 7 verification evidence
+- `pnpm check` passed; `pnpm test` passed all 27 tests across 7 files; `pnpm build` succeeded; `git diff --check` was clean. The static manifest and HTTP 200 route/manifest were verified.
+- Browser flow validated connected → network loss → local #1044 (Flash Flood, Sector 05, 3 people, PENDING TRIAGE, QUEUED OFFLINE / WAITING FOR SYNC) → network restored → SYNCING OFFLINE DATA... → SYNCED / OFFLINE SOS SYNCHRONIZED. The queued record persisted when navigating to Command Center and back before restoration.
+- Same-session regression view showed #1043 on Road C → Shelter 07, Team Bravo EN ROUTE / ETA 11 min, and #1044 separately pending triage. The existing Shelters & Resources page still showed Shelter 07, Road C and Team Bravo status.
+- Responsive browser measurements: 390px mobile (including the full offline sync flow), 768px tablet, and 1024px desktop had no horizontal overflow. The mobile run visibly captured the active SYNCING status and completed sync.
+- The browser validation harness had one timing-related selector failure and one corrected test-script syntax error; subsequent manual and scripted UI flows completed. No blocking application runtime error was observed. The build retains non-blocking existing Vite warnings for the platform config script lacking `type=module` and the main client chunk exceeding 500 kB.
+- Offline requests and network state are in-memory demo state, not durable across a full application reload and not a real or guaranteed emergency communications service. No live network, external API, database, or backend was added.
+- Credit balance is not available from the project environment; 458 was the user's reported starting estimate, not a verified current balance.

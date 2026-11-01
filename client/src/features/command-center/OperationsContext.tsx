@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useReducer, useRef, type ReactNode } from "react";
 import { demoOperations } from "@/data/demo";
-import type { Incident, IncidentTimelineEvent, OperationsState } from "@/types/disaster";
+import type { Incident, IncidentTimelineEvent, OfflineSOSRequest, OperationsState } from "@/types/disaster";
 
 export interface RescueDispatchRequest {
   incidentId: string;
@@ -13,6 +13,8 @@ export interface RescueDispatchRequest {
 type OperationsAction =
   | { type: "incident/add"; incident: Incident }
   | { type: "incident/update"; id: string; changes: Partial<Incident> }
+  | { type: "system/update"; changes: Partial<OperationsState["systemStatus"]> }
+  | { type: "offline/set"; request: OfflineSOSRequest }
   | { type: "rescue/dispatch"; request: RescueDispatchRequest };
 
 interface OperationsContextValue {
@@ -20,6 +22,8 @@ interface OperationsContextValue {
   addIncident: (incident: Incident) => void;
   createIncident: (draft: Omit<Incident, "id">) => Incident;
   updateIncident: (id: string, changes: Partial<Incident>) => void;
+  updateSystemStatus: (changes: Partial<OperationsState["systemStatus"]>) => void;
+  setOfflineRequest: (request: OfflineSOSRequest) => void;
   dispatchRescueTeam: (request: RescueDispatchRequest) => boolean;
 }
 
@@ -87,6 +91,17 @@ function operationsReducer(state: OperationsState, action: OperationsAction): Op
           incident.id === action.id ? { ...incident, ...action.changes, id: incident.id } : incident,
         ),
       };
+    case "system/update":
+      return { ...state, systemStatus: { ...state.systemStatus, ...action.changes } };
+    case "offline/set": {
+      const offlineQueue = state.offlineQueue ?? [];
+      return {
+        ...state,
+        offlineQueue: offlineQueue.some((request) => request.id === action.request.id)
+          ? offlineQueue.map((request) => request.id === action.request.id ? action.request : request)
+          : [action.request, ...offlineQueue],
+      };
+    }
     case "rescue/dispatch":
       return applyRescueDispatch(state, action.request);
     default:
@@ -108,12 +123,14 @@ export function OperationsProvider({ children }: { children: ReactNode }) {
     return incident;
   }, [state.incidents]);
   const updateIncident = useCallback((id: string, changes: Partial<Incident>) => dispatch({ type: "incident/update", id, changes }), []);
+  const updateSystemStatus = useCallback((changes: Partial<OperationsState["systemStatus"]>) => dispatch({ type: "system/update", changes }), []);
+  const setOfflineRequest = useCallback((request: OfflineSOSRequest) => dispatch({ type: "offline/set", request }), []);
   const dispatchRescueTeam = useCallback((request: RescueDispatchRequest) => {
     if (!canDispatchRescueTeam(state, request)) return false;
     dispatch({ type: "rescue/dispatch", request });
     return true;
   }, [state]);
-  const value = useMemo(() => ({ state, addIncident, createIncident, updateIncident, dispatchRescueTeam }), [state, addIncident, createIncident, updateIncident, dispatchRescueTeam]);
+  const value = useMemo(() => ({ state, addIncident, createIncident, updateIncident, updateSystemStatus, setOfflineRequest, dispatchRescueTeam }), [state, addIncident, createIncident, updateIncident, updateSystemStatus, setOfflineRequest, dispatchRescueTeam]);
 
   return <OperationsContext.Provider value={value}>{children}</OperationsContext.Provider>;
 }

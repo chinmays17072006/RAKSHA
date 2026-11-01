@@ -127,6 +127,16 @@ export interface SOSRequest {
   location: string;
 }
 
+export interface OfflineSOSRequest {
+  id: "1044";
+  type: "Flash Flood";
+  location: "Sector 05";
+  people: 3;
+  priority: "PENDING TRIAGE";
+  reportedAt: string;
+  status: "QUEUED OFFLINE" | "SYNCING" | "SYNCED";
+}
+
 export interface SystemStatus {
   network: "Connected" | "Disconnected";
   dataSync: "Live" | "Paused";
@@ -142,5 +152,6 @@ export interface OperationsState {
   riskZones: DisasterZone[];
   roads: Road[];
   resources: Resource[];
+  offlineQueue?: OfflineSOSRequest[];
   systemStatus: SystemStatus;
 }

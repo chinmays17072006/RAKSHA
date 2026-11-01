@@ -133,6 +133,7 @@ export const demoOperations: OperationsState = {
     { id: "resource-03", name: "Water & meal packs", category: "Relief", available: 320, unit: "packs", location: "Sector 01" },
     { id: "resource-04", name: "High-clearance vehicles", category: "Transport", available: 5, unit: "vehicles", location: "Central depot" },
   ],
+  offlineQueue: [],
   systemStatus: {
     network: "Connected",
     dataSync: "Live",
