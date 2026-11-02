@@ -16,20 +16,34 @@ function loadMapScript(): Promise<void> {
   if (mapsScriptPromise) return mapsScriptPromise;
 
   const config = window.__MANUS_CONFIG__;
-  if (!config?.apiUrl || !config.apiBrowserKey) {
+  if (!config) {
     return Promise.reject(new Error("Maps configuration is unavailable"));
   }
 
-  const apiKey = encodeURIComponent(config.apiBrowserKey);
-  const mapsProxyUrl = `${config.apiUrl.replace(/\/$/, "")}/v1/maps/proxy`;
+  const isRakshaGitHubPages = window.location.hostname === "chinmays17072006.github.io"
+    && window.location.pathname.startsWith("/RAKSHA");
+  const browserApiKey = isRakshaGitHubPages ? config.googleMapsApiKey : "";
+  const proxyAvailable = Boolean(config.apiUrl && config.apiBrowserKey);
+  if (!browserApiKey && !proxyAvailable) {
+    return Promise.reject(new Error("Maps configuration is unavailable"));
+  }
+
+  const mapsScriptUrl = browserApiKey
+    ? new URL("https://maps.googleapis.com/maps/api/js")
+    : new URL(`${config.apiUrl.replace(/\/$/, "")}/v1/maps/proxy/maps/api/js`);
+  mapsScriptUrl.searchParams.set("key", browserApiKey || config.apiBrowserKey);
+  mapsScriptUrl.searchParams.set("v", "weekly");
+  if (!browserApiKey) mapsScriptUrl.searchParams.set("origin", window.location.origin);
   mapsScriptPromise = new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = `${mapsProxyUrl}/maps/api/js?key=${apiKey}&v=weekly&libraries=marker,places,geocoding,geometry`;
+    script.src = mapsScriptUrl.toString();
     script.async = true;
-    script.crossOrigin = "anonymous";
     script.onload = () => {
       if (window.google?.maps) resolve();
-      else reject(new Error("Google Maps did not initialize"));
+      else {
+        mapsScriptPromise = null;
+        reject(new Error("Google Maps did not initialize"));
+      }
       script.remove();
     };
     script.onerror = () => {
