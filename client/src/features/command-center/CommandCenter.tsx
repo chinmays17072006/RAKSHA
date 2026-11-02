@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+/// <reference types="@types/google.maps" />
+
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import {
   Activity,
@@ -13,7 +15,6 @@ import {
   CircleDot,
   CloudRain,
   Crosshair,
-  Droplets,
   LayoutDashboard,
   Layers,
   LifeBuoy,
@@ -36,6 +37,7 @@ import { NavigationItem } from "@/components/system/NavigationItem";
 import { useOperations } from "./OperationsContext";
 import type { DisasterZone, Incident, RescueTeam, Shelter, SystemStatus } from "@/types/disaster";
 import { Dialog, useToast } from "@/components/system/feedback";
+import { DEMO_MAP_CENTER, GoogleDisasterMap } from "./GoogleDisasterMap";
 import {
   Button,
   Card,
@@ -201,176 +203,59 @@ export function TopBar({
   );
 }
 
-function MapLayer({
-  floodVisible,
-  waterLevel,
-  teamsVisible,
-  sheltersVisible,
-  riskZones,
-  incidents,
-  rescueTeams,
-  shelters,
-  onSelectIncident,
-  onSelectTeam,
-  onSelectShelter,
-  focusPulse,
-}: {
-  floodVisible: boolean;
-  waterLevel: number;
-  teamsVisible: boolean;
-  sheltersVisible: boolean;
-  riskZones: DisasterZone[];
-  incidents: Incident[];
-  rescueTeams: RescueTeam[];
-  shelters: Shelter[];
-  onSelectIncident: (incidentId: string) => void;
-  onSelectTeam: (team: RescueTeam) => void;
-  onSelectShelter: (shelter: Shelter) => void;
-  focusPulse: boolean;
-}) {
-  return (
-    <div className={`map-canvas ${focusPulse ? "map-canvas--focused" : ""}`}>
-      <svg className="map-svg" viewBox="0 0 920 410" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Schematic disaster map showing simulated critical, high, moderate, and safe zones across seven sectors">
-        <defs>
-          <pattern id="map-grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#294050" strokeWidth=".6" opacity=".48" /></pattern>
-          <pattern id="water-lines" width="24" height="14" patternUnits="userSpaceOnUse"><path d="M-2 8c4-4 8-4 12 0s8 4 12 0 8-4 12 0" fill="none" stroke="#36a7c8" strokeWidth=".8" opacity=".37" /></pattern>
-          <radialGradient id="map-fade"><stop offset="0" stopColor="#1c3441" stopOpacity=".45" /><stop offset="1" stopColor="#0b151d" stopOpacity="0" /></radialGradient>
-          <filter id="marker-glow" x="-300%" y="-300%" width="700%" height="700%"><feGaussianBlur stdDeviation="4" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
-        </defs>
-        <rect width="920" height="410" fill="#0c171f" />
-        <rect width="920" height="410" fill="url(#map-grid)" />
-        <ellipse cx="540" cy="205" rx="440" ry="250" fill="url(#map-fade)" />
-        <path className="map-river" d="M-40 330C83 276 89 213 222 226c91 9 130 77 234 50 78-20 105-97 193-91 102 7 145 66 303 16v116c-102 48-183 13-279 2-115-14-138 65-240 74-119 10-186-76-281-53-77 18-102 67-192 85Z" />
-        <path className="map-river-edge" d="M-40 330C83 276 89 213 222 226c91 9 130 77 234 50 78-20 105-97 193-91 102 7 145 66 303 16" />
-        <g className="map-roads" fill="none" strokeLinecap="round">
-          <path d="M-15 90C102 102 135 152 237 140s146-54 251-33 183 66 293 36 128-64 188-64" />
-          <path d="M-26 174c94-10 143-23 222 6s147 79 247 56 129-74 235-60 158 31 278 2" />
-          <path d="M-20 254c92-16 130-70 220-68 103 3 131 58 228 92s148 36 232-6 140-105 280-95" />
-          <path d="M125-20c29 70 42 123 29 195s-60 127-36 259" />
-          <path d="M326-20c-15 76-25 127 13 192s37 126 21 258" />
-          <path d="M540-10c22 62 77 111 74 173s-49 131-30 267" />
-          <path d="M742-10c-22 80-50 127-14 185s77 97 63 255" />
-          <path d="M-18 120 173 105 325 124 489 88 659 113 920 69" />
-          <path d="M-12 300 133 272 268 289 421 324 555 305 721 263 926 283" />
-        </g>
-        <g className="map-minor-roads" fill="none" strokeLinecap="round">
-          <path d="m57 57 64 20 62-15 37 37m74 51 46-31 59 9m129 164 56 16 46-37 70 3m70-70 44 16 51-24" />
-          <path d="m212 340 26-57 46-30m-14-202 40 30 31-4m236-8 39 35 37-7" />
-        </g>
-        <g className="map-boundaries">
-          <path d="M40 48 320 31 409 92 380 204 292 260 90 230Z" />
-          <path d="M409 92 628 63 742 117 690 234 533 270 380 204Z" />
-          <path d="m90 230 202 30 88-56 153 66-31 116-232 24-187-36Z" />
-          <path d="m533 270 157-36 185 43-9 103-258 16-133-22Z" />
-        </g>
-        <g className="map-risk-zones">
-          {riskZones.map((zone) => (
-            <g key={zone.id} className={`map-risk-zone map-risk-zone--${zone.riskLevel.toLowerCase()}`}>
-              <ellipse cx={zone.coordinates.x * 9.2} cy={zone.coordinates.y * 4.1} rx={zone.radius * 4.1} ry={zone.radius * 2.25}>
-                <title>{`${zone.sector} · ${zone.riskLevel} · ${zone.name}`}</title>
-              </ellipse>
-            </g>
-          ))}
-        </g>
-        <g className="map-labels">
-          <text x="78" y="112">SECTOR 01</text><text x="126" y="142">SECTOR 02</text><text x="300" y="103">SECTOR 03</text><text x="470" y="153">SECTOR 04</text><text x="710" y="183">SECTOR 05</text>
-          <text x="198" y="322">SECTOR 07</text><text x="634" y="344">SECTOR 09</text>
-          <text className="map-labels__river" x="334" y="238" transform="rotate(8 334 238)">EASTERN CHANNEL</text>
-          <text className="map-labels__district" x="48" y="38">EASTERN DISTRICT / SIMULATED LAYER</text>
-        </g>
-        {floodVisible && <g className="map-flood-zone">
-          <path d="M410 120c40-32 104-27 140-4 35 23 67 36 61 80-4 31-34 50-70 58-38 8-69 3-101-16-41-24-73-34-67-70 4-21 14-35 37-48Z" />
-          <path d="M410 120c40-32 104-27 140-4 35 23 67 36 61 80-4 31-34 50-70 58-38 8-69 3-101-16-41-24-73-34-67-70 4-21 14-35 37-48Z" fill="url(#water-lines)" />
-          <text x="498" y="202">HIGH-WATER ZONE</text>
-          <text x="509" y="219">{waterLevel.toFixed(1)} M / RISING</text>
-        </g>}
-      </svg>
-      <div className="map-marker-layer" role="group" aria-label="Simulated incident, response-team, and shelter markers">
-        {incidents.filter((incident) => incident.source === "SOS" || incident.source === "Citizen SOS").map((incident) => (
-          <button
-            type="button"
-            key={incident.id}
-            className={`map-point map-point--sos ${incident.id === "1042" ? "map-point--primary" : ""} ${incident.severity === "Critical" ? "map-point--critical" : incident.severity === "Pending triage" ? "map-point--pending" : ""}`}
-            style={{ left: `${incident.coordinates.x}%`, top: `${incident.coordinates.y}%` }}
-            onClick={() => onSelectIncident(incident.id)}
-            aria-label={`Open incident #${incident.id}, ${incident.priority} ${incident.severity}, ${incident.location}`}
-            title={`#${incident.id} · ${incident.priority} · ${incident.severity}`}
-          >
-            <span className="map-point__icon"><LifeBuoy size={incident.id === "1042" ? 15 : 12} /></span>
-            {incident.id === "1042" ? <span className="map-point__label"><strong>#1042 <b>P0</b></strong><small>CRITICAL · SECTOR 04</small></span> : <span className="map-point__code">#{incident.id} · {incident.priority === "Pending" ? "PENDING" : incident.priority}</span>}
-          </button>
-        ))}
-        {teamsVisible && rescueTeams.slice(0, 3).map((team) => (
-          <button
-            type="button"
-            key={team.id}
-            className="map-point map-point--team"
-            style={{ left: `${team.coordinates.x}%`, top: `${team.coordinates.y}%` }}
-            onClick={() => onSelectTeam(team)}
-            aria-label={`Show information for ${team.name}`}
-            title={team.name}
-          ><span className="map-point__icon"><Truck size={13} /></span><span className="map-point__asset-label">{team.name.replace("TEAM ", "")}</span></button>
-        ))}
-        {sheltersVisible && shelters.slice(0, 3).map((shelter) => (
-          <button
-            type="button"
-            key={shelter.id}
-            className="map-point map-point--shelter"
-            style={{ left: `${shelter.coordinates.x}%`, top: `${shelter.coordinates.y}%` }}
-            onClick={() => onSelectShelter(shelter)}
-            aria-label={`Show information for ${shelter.name}`}
-            title={shelter.name}
-          ><span className="map-point__icon"><Building2 size={12} /></span><span className="map-point__asset-label">{shelter.name.replace("SHELTER ", "S")}</span></button>
-        ))}
-      </div>
-      <div className="map-compass" aria-hidden="true"><span>N</span><div><i /><i /><i /><i /></div></div>
-      <div className="map-note"><CircleDot size={11} /> SIMULATED MAP DATA <span>·</span> NOT TO SCALE</div>
-    </div>
-  );
-}
-
-function MapPanel({ incidents, rescueTeams, shelters, riskZones, waterLevel, onSelectIncident }: {
+function MapPanel({ incidents, rescueTeams, shelters, riskZones, onSelectIncident }: {
   incidents: Incident[];
   rescueTeams: RescueTeam[];
   shelters: Shelter[];
   riskZones: DisasterZone[];
-  waterLevel: number;
   onSelectIncident: (incidentId: string) => void;
 }) {
   const [layers, setLayers] = useState({ flood: true, teams: true, shelters: true });
-  const [focused, setFocused] = useState(false);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [selectedShelterId, setSelectedShelterId] = useState<string | null>(null);
   const selectedTeam = rescueTeams.find((team) => team.id === selectedTeamId) ?? null;
   const selectedShelter = shelters.find((shelter) => shelter.id === selectedShelterId) ?? null;
   const showToast = useToast();
   const toggleLayer = (key: keyof typeof layers) => setLayers((current) => ({ ...current, [key]: !current[key] }));
+  const selectIncident = useCallback((id: string) => {
+    setSelectedTeamId(null);
+    setSelectedShelterId(null);
+    onSelectIncident(id);
+  }, [onSelectIncident]);
+  const selectTeam = useCallback((team: RescueTeam) => {
+    setSelectedShelterId(null);
+    setSelectedTeamId(team.id);
+  }, []);
+  const selectShelter = useCallback((shelter: Shelter) => {
+    setSelectedTeamId(null);
+    setSelectedShelterId(shelter.id);
+  }, []);
   const focusMap = () => {
-    setFocused(true);
-    showToast({ title: "Sector 04 centered", detail: "Simulated map view · no live routing is connected.", tone: "info" });
-    window.setTimeout(() => setFocused(false), 850);
+    map?.panTo(DEMO_MAP_CENTER);
+    map?.setZoom(14);
+    showToast({ title: "Demo reference area centered", detail: "Incident overlays use simulated coordinates, not live GPS.", tone: "info" });
   };
 
   return (
     <Card className="map-panel">
       <div className="map-panel__header">
         <SectionHeader eyebrow="GEOSPATIAL AWARENESS" title="Live disaster map" />
-        <div className="map-panel__header-meta"><StatusBadge tone="info" dot>DEMO LAYER</StatusBadge><span>UPDATED JUST NOW</span></div>
+        <div className="map-panel__header-meta"><StatusBadge tone="info" dot>GOOGLE MAPS</StatusBadge><span>SIMULATED OVERLAYS</span></div>
       </div>
       <div className="map-panel__visual-wrap">
-        <MapLayer
+        <GoogleDisasterMap
           floodVisible={layers.flood}
-          waterLevel={waterLevel}
           teamsVisible={layers.teams}
           sheltersVisible={layers.shelters}
           riskZones={riskZones}
           incidents={incidents}
           rescueTeams={rescueTeams}
           shelters={shelters}
-          onSelectIncident={(id) => { setSelectedTeamId(null); setSelectedShelterId(null); onSelectIncident(id); }}
-          onSelectTeam={(team) => { setSelectedShelterId(null); setSelectedTeamId(team.id); }}
-          onSelectShelter={(shelter) => { setSelectedTeamId(null); setSelectedShelterId(shelter.id); }}
-          focusPulse={focused}
+          onMapReady={setMap}
+          onSelectIncident={selectIncident}
+          onSelectTeam={selectTeam}
+          onSelectShelter={selectShelter}
         />
         {(selectedTeam || selectedShelter) && <div className="map-asset-popup" role="status">
           <button className="icon-button map-asset-popup__close" onClick={() => { setSelectedTeamId(null); setSelectedShelterId(null); }} aria-label="Close map information"><X size={14} /></button>
@@ -394,14 +279,14 @@ function MapPanel({ incidents, rescueTeams, shelters, riskZones, waterLevel, onS
           <button className={layers.teams ? "map-layer map-layer--active" : "map-layer"} aria-pressed={layers.teams} onClick={() => toggleLayer("teams")}><span className="map-layer__swatch map-layer__swatch--team" /> Field units</button>
           <button className={layers.shelters ? "map-layer map-layer--active" : "map-layer"} aria-pressed={layers.shelters} onClick={() => toggleLayer("shelters")}><span className="map-layer__swatch map-layer__swatch--shelter" /> Shelters</button>
         </div>
-        <button className="map-focus" onClick={focusMap} aria-label="Center the map on Sector 04"><Crosshair size={15} /></button>
+        <button className="map-focus" onClick={focusMap} aria-label="Center the map on the demo reference area"><Crosshair size={15} /></button>
       </div>
       <div className="map-panel__footer">
         <div className="map-legend" aria-label="Map legend">
           <span><i className="legend-dot legend-dot--critical" /> Critical</span><span><i className="legend-dot legend-dot--high" /> High Risk</span><span><i className="legend-dot legend-dot--moderate" /> Moderate</span><span><i className="legend-dot legend-dot--safe" /> Safe</span>
           <span><LifeBuoy size={10} /> SOS</span><span><Truck size={10} /> Rescue Team</span><span><Building2 size={10} /> Shelter</span>
         </div>
-        <span className="map-scale">SECTOR 04 <b /> 1.4 KM</span>
+        <span className="map-scale">DEMO AREA <b /> SIMULATED</span>
       </div>
     </Card>
   );
@@ -643,7 +528,7 @@ export default function CommandCenter() {
             </section>
 
             <section className="dashboard-grid" aria-label="Map and priority incidents">
-              <MapPanel incidents={state.incidents} rescueTeams={state.rescueTeams} shelters={state.shelters} riskZones={state.riskZones} waterLevel={primaryRiskZone?.waterLevel ?? 0} onSelectIncident={onSelectIncident} />
+              <MapPanel incidents={state.incidents} rescueTeams={state.rescueTeams} shelters={state.shelters} riskZones={state.riskZones} onSelectIncident={onSelectIncident} />
               <IncidentPanel incidents={state.incidents} rescueTeams={state.rescueTeams} onSelectIncident={onSelectIncident} />
             </section>
 
